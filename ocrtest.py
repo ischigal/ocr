@@ -15,10 +15,12 @@ from pdfminer.converter import PDFPageAggregator
 from pdfminer.pdfpage import PDFPage
 from pdfminer.layout import LTTextBoxHorizontal
 
-
+###################################################################################################
 
 #tesseract location
 pytesseract.pytesseract.tesseract_cmd = r'/usr/bin/tesseract'
+
+##################################################################################################
 
 urllib.request.urlretrieve("http://neunbe.at/pictures/44-111MENUE111--.jpg", "test.jpg")
 
@@ -35,6 +37,7 @@ img_crop2 = img.crop(area2)
 #print(type(pytesseract.image_to_string(img_crop, lang='deu')))
 out = (pytesseract.image_to_string(img_crop, lang='deu'))
 #print(out)
+
 Mon = re.search('Montag((?s).*)Dienstag',out).group(1)
 Die = re.search('Dienstag((?s).*)Mittwoch',out).group(1)
 Mit = re.search('Mittwoch((?s).*)Donnerstag',out).group(1)
@@ -78,6 +81,7 @@ thisweek = today.isocalendar()[1]
 weekday = ("Montag","Dienstag","Mittwoch","Donnerstag","Freitag","Samstag","Sonntag")[today.weekday()]
 #print(weekday)
 
+###################################################################################################
 
 document = open('test.pdf', 'rb')
 #Create resource manager
@@ -97,7 +101,6 @@ for page in PDFPage.get_pages(document):
 			#print(element.get_text())
 			textlist.append(element.get_text())
 
-print(textlist)
-
-
-
+#print(PDFPage.get_pages(document))
+#print(layout)
+#print(textlist)
