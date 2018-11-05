@@ -49,56 +49,59 @@ def lunchprinter(NeunBE, Mensa, Tech, wholeweek=False, tomorrow=False):
 		
 		else:
 			weekday = (datetime.date.today()+datetime.timedelta(days=1)).weekday()	
-
+		
 		if weekday == 0:
 			mensa = Mensa['Mon']
 			tech = Tech['Mon']
 			neunbe = NeunBE['Mon']
 			print("Montag", "\n", "Mensa:", "\n", mensa, "\n",
 			"TechCafe:", "\n", tech, "\n", "9b:", "\n", neunbe)
-		if weekday == 1:
+		elif weekday == 1:
 			mensa = Mensa['Die']
 			tech = Tech['Die']
 			neunbe = NeunBE['Die']
 			print("Dienstag","\n","Mensa:","\n",mensa,"\n",
 			"TechCafe:","\n",tech,"\n","9b:","\n",neunbe)
-		if weekday == 2:
+		elif weekday == 2:
 			mensa = Mensa['Mit']
 			tech = Tech['Mit']
 			neunbe = NeunBE['Mit']
 			print("Mittwoch","\n","Mensa:","\n",mensa,"\n",
 			"TechCafe:","\n",tech,"\n","9b:","\n",neunbe)
-		if weekday == 3:
+		elif weekday == 3:
 			mensa = Mensa['Don']
 			tech = Tech['Don']
 			neunbe = NeunBE['Don']
 			print("Donnerstag","\n","Mensa:","\n",mensa,"\n",
 			"TechCafe:","\n",tech,"\n","9b:","\n",neunbe)
-		if weekday == 4:
+		elif weekday == 4:
 			mensa = Mensa['Fre']
 			tech = Tech['Fre']
 			neunbe = NeunBE['Fre']	
 			print("Freitag","\n","Mensa:","\n",mensa,"\n",
 			"TechCafe:","\n",tech,"\n","9b:","\n",neunbe)
-		else: 
+		elif weekday > 4: 
 			print("Hoch die Hände Wochenede")
 
 ##################################################################################################
 
-#urllib.request.urlretrieve("http://neunbe.at/pictures/44-111MENUE111--.jpg", "test.jpg") #9be FAIL
+urllib.request.urlretrieve("http://neunbe.at/pictures/45-111MENUE111--.jpg", "test.jpg") #9be FAILS a lot but seems to keep this name going for at least two consecutive weeks.
+
 
 img = (Image.open('test.jpg'))
-area = (350,220,800,500)
+area = (380,240,795,500)
 img_crop = img.crop(area)
 #img_crop.show()
 
-area2 = (320,500,850,775)
+area2 = (350,520,825,850)
 img_crop2 = img.crop(area2)
 #img_crop2.show()
 
+
+
 #language option needs installation of file in usr/share/tessseract/4.00/tessdata
 #print(type(pytesseract.image_to_string(img_crop, lang='deu')))
-out = (pytesseract.image_to_string(img_crop, lang='deu'))
+out = (pytesseract.image_to_string(img_crop, lang='deu', config='--psm 6'))
 #print(out)
 
 Mon = re.search('Montag((?s).*)Dienstag',out).group(1)
@@ -119,12 +122,12 @@ Fre = re.sub(" +"," ",Fre.replace("\n"," ").strip())
 #print(Don)
 #print(Fre)
 
-out2 = (pytesseract.image_to_string(img_crop2, lang='deu'))
+out2 = (pytesseract.image_to_string(img_crop2, lang='deu',config='--psm 6'))
 #print(out2)
 
 MBurger = re.search('Monatsburger:((?s).*)Wochenburger',out2).group(1)
-WBurger = re.search('Wochenburger:((?s).*)Oktober',out2).group(1)
-MAktion = re.search('Aktion:((?s).*)',out2).group(1)
+WBurger = re.search('Wochenburger:((?s).*)Wochencurry',out2).group(1)
+MAktion = re.search('Wochencurry;((?s).*)',out2).group(1) #stupid 9b can't write
 MBurger = re.sub(" +"," ",MBurger.replace("\n"," ").strip())
 WBurger = re.sub(" +"," ",WBurger.replace("\n"," ").strip())
 MAktion = re.sub(" +"," ",MAktion.replace("\n"," ").strip())
@@ -132,7 +135,9 @@ MAktion = re.sub(" +"," ",MAktion.replace("\n"," ").strip())
 #print(MBurger)
 #print(WBurger)
 #print(MAktion)
-NeunB = {'Mon':{'Tagesteller':Mon,'Monatsburger':MBurger,'Wochenburger':WBurger,'Monatsaktion':MAktion},'Die':{'Tagesteller':Die,'Monatsburger':MBurger,'Wochenburger':WBurger,'Monatsaktion':MAktion},'Mit':{'Tagesteller':Mit,'Monatsburger':MBurger,'Wochenburger':WBurger,'Monatsaktion':MAktion},'Don':{'Tagesteller':Don,'Monatsburger':MBurger,'Wochenburger':WBurger,'Monatsaktion':MAktion},'Fre':{'Tagesteller':Fre,'Monatsburger':MBurger,'Wochenburger':WBurger,'Monatsaktion':MAktion}}
+#Monatsaktion wurde schon wieder durch Wochencurry ersetzt... 
+
+NeunB = {'Mon':{'Tagesteller':Mon,'Monatsburger':MBurger,'Wochenburger':WBurger,'Wochencurry':MAktion},'Die':{'Tagesteller':Die,'Monatsburger':MBurger,'Wochenburger':WBurger,'Wochencurry':MAktion},'Mit':{'Tagesteller':Mit,'Monatsburger':MBurger,'Wochenburger':WBurger,'Wochencurry':MAktion},'Don':{'Tagesteller':Don,'Monatsburger':MBurger,'Wochenburger':WBurger,'Wochencurry':MAktion},'Fre':{'Tagesteller':Fre,'Monatsburger':MBurger,'Wochenburger':WBurger,'Wochencurry':MAktion}}
 
 ###################################################################################################
 #menu.mensen.at//index/menu-pdf/locid/42?woy=45&year=2018
