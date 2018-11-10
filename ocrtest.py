@@ -43,8 +43,8 @@ def lunchprinter(NeunBE, Mensa, Tech, wholeweek=False, tomorrow=False):
 			weekday = (datetime.date.today()+datetime.timedelta(days=1)).weekday()	
 		
 		day = ['Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag','Sonntag'][weekday]
-		#print(day)		
-		if day == 'Samstag' or day == 'Sonntag':
+		
+		if weekday >= 5:
 			print("Hoch die Hände Wochenende!")
 		else:
 			mensa = Mensa[weekday]
@@ -53,22 +53,22 @@ def lunchprinter(NeunBE, Mensa, Tech, wholeweek=False, tomorrow=False):
 			print('TODO - Tagesmenü anzeigen')
 			
 ########## 9b - the people who can't name files in a coherent way ###############################
+neunB_menu_file = "neunB_menu"+weeknumber+".jpg"
 
-#urllib.request.urlretrieve("http://neunbe.at/pictures/"+weeknumber+"-111MENUE111--.jpg", "test.jpg") #9be FAILS a lot but seems to keep this name going for at least two consecutive weeks.
+urllib.request.urlretrieve("http://neunbe.at/pictures/"+weeknumber+"-111MENUE111--.jpg", neunb_menu_file) #9be FAILS a lot but seems to keep this name going for at least two consecutive weeks.
 
-img = (Image.open('test.jpg'))
-area = (380,240,795,500)   #these change from weeks to weekt unfortunatley, so they have to be adjusted manually every week
+img = (Image.open(neunB_week_file))
+area = (380,240,795,500)   #these change from week to week unfortunatley, so they have to be adjusted manually every week
 img_crop = img.crop(area)
 #img_crop.show()
 
-area2 = (350,520,825,850)  #these change from weeks to weekt unfortunatley, so they have to be adjusted manually every week
+area2 = (350,520,825,850)  #these change from week to week unfortunatley, so they have to be adjusted manually every week
 img_crop2 = img.crop(area2)
 #img_crop2.show()
 
 #language option needs installation of file in usr/share/tessseract/4.00/tessdata
 
 out = (pytesseract.image_to_string(img_crop, lang='deu', config='--psm 6'))
-
 
 Mon = re.sub(" +", " ", re.search('Montag((?s).*)Dienstag', out).group(1).replace("\n"," ").strip())
 Die = re.sub(" +", " ", re.search('Dienstag((?s).*)Mittwoch', out).group(1).replace("\n"," ").strip())
@@ -86,42 +86,39 @@ daylist = [Mon,Die,Mit,Don,Fre]
 NeunB = np.ndarray((5,4),dtype=object)
 
 for ind in range(0,5):
-	NeunB[ind][0]=daylist[ind]
-	NeunB[ind][1]=MBurger
-	NeunB[ind][2]=WBurger
-	NeunB[ind][3]=WCurry
+	NeunB[ind][0] = daylist[ind]
+	NeunB[ind][1] = MBurger
+	NeunB[ind][2] = WBurger
+	NeunB[ind][3] = WCurry
 
 ######### MENSA = locid 42    ##############################################################
-
-urllib.request.urlretrieve("http://menu.mensen.at//index/menu-pdf/locid/42?woy="+weeknumber+"&year=2018","test.pdf")
+mensa_file = "mensa_menu_week"+weeknumber+".pdf"
+urllib.request.urlretrieve("http://menu.mensen.at//index/menu-pdf/locid/42?woy="+weeknumber+"&year=2018",mensa_file)
 
 # Read pdf into DataFrame
-df = tabula.read_pdf("test.pdf", pages="all", lattice=True, guess=True, mulitple_tables=True ,output_format="json")
+df = tabula.read_pdf(mensa_file, pages="all", lattice=True, guess=True, mulitple_tables=True ,output_format="json")
 
 Men = np.ndarray((5,3),dtype=object)
 
 for jnd in range(0,5):
 	if jnd != 4:
-		Men[jnd][0]= re.sub('(€ ?\d+\,\d{1,2})', "", df[0]['data'][jnd+2][1]['text'].replace("\r", ", "))
-		Men[jnd][1]=re.sub('(€ ?\d+\,\d{1,2})', "", df[0]['data'][jnd+2][2]['text'].replace("\r", ", "))
-		Men[jnd][2]=re.sub('(€ ?\d+\,\d{1,2})', "", df[0]['data'][jnd+2][3]['text'].replace("\r", ", "))
+		for i in range(0,3):
+			Men[jnd][i] = re.sub('(€ ?\d+\,\d{1,2})', "", df[0]['data'][jnd+2][i+1]['text'].replace("\r", ", "))
 	else:
-		Men[jnd][0]= re.sub('(€ ?\d+\,\d{1,2})', "", df[2]['data'][1][1]['text'].replace("\r", ", "))
-		Men[jnd][1]=re.sub('(€ ?\d+\,\d{1,2})', "", df[2]['data'][1][2]['text'].replace("\r", ", "))
-		Men[jnd][2]=re.sub('(€ ?\d+\,\d{1,2})', "", df[2]['data'][1][3]['text'].replace("\r", ", "))
+		for i in range(0,3):
+			Men[jnd][i] = re.sub('(€ ?\d+\,\d{1,2})', "", df[2]['data'][1][i+1]['text'].replace("\r", ", "))
 
 ######################### TECH = locid 55 ####################################################
+tech_file = "tech_menu_week"+weeknumber+".pdf"
+urllib.request.urlretrieve("http://menu.mensen.at//index/menu-pdf/locid/55?woy="+weeknumber+"&year=2018",tech_file)
 
-urllib.request.urlretrieve("http://menu.mensen.at//index/menu-pdf/locid/55?woy="+weeknumber+"&year=2018","test2.pdf")
-
-df2 = tabula.read_pdf("test2.pdf", pages="all", lattice=True, guess=True, mulitple_tables=True ,output_format="json")
+df2 = tabula.read_pdf(tech_file, pages="all", lattice=True, guess=True, mulitple_tables=True ,output_format="json")
 
 Tec = np.ndarray((5,3),dtype=object)
 
 for knd in range(0,5):
-	Tec[knd][0] = re.sub('(€ ?\d+\,\d{1,2})', "", re.sub(' *\((.*?)\)', "", df2[0]['data'][knd+2][1]['text'].replace("\r", ", "))) 
-	Tec[knd][1] = re.sub('(€ ?\d+\,\d{1,2})', "", re.sub(' *\((.*?)\)', "", df2[0]['data'][knd+2][2]['text'].replace("\r", ", ")))
-	Tec[knd][2] = re.sub('(€ ?\d+\,\d{1,2})', "", re.sub(' *\((.*?)\)', "", df2[0]['data'][knd+2][3]['text'].replace("\r", ", ")))
+	for i in range(0,3):
+		Tec[knd][i] = re.sub('(€ ?\d+\,\d{1,2})', "", re.sub(' *\((.*?)\)', "", df2[0]['data'][knd+2][i+1]['text'].replace("\r", ", ")))
 
 ###################################################################################################
 
