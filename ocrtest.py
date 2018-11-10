@@ -7,20 +7,24 @@ import urllib.request
 import pytesseract
 import re
 import datetime
-import numpy as np
-import pandas
 import tabula
 import pprint
+import numpy as np
 
 ###################################################################################################
 
 #tesseract location
 pytesseract.pytesseract.tesseract_cmd = r'/usr/bin/tesseract'
 
+#weeknumber hardcoded for now TODO: be able to look at any week the user wants, only possible for Mensa & Tech though, 9b uploads their menu on sunday
+
+weeknumber = str(datetime.date.today().isocalendar()[1])  #needed as string for concatenation
+
 ###################################################################################################
 
-#general TODO: check week of year and download according file, print mondays lunch on weekends
+#general TODO: print mondays lunch on weekends
 # also TODO: print weekplan without alphabetical ordering
+# TODO as always clean up code
 
 def lunchprinter(NeunBE, Mensa, Tech, wholeweek=False, tomorrow=False):
 	
@@ -28,19 +32,7 @@ def lunchprinter(NeunBE, Mensa, Tech, wholeweek=False, tomorrow=False):
 		mensa = Mensa
 		tech = Tech
 		neunbe = NeunBE
-		#print("Wochenplan - Mensa")
-		#for key in list(mensa.keys()):
-		#	print(key)
-		#	pprint.pprint(mensa[key])
-		#print("Wochenplan - Tech")
-		#for key in list(tech.keys()):
-		#	print(key)			
-		#	pprint.pprint(tech[key])
-		#print("Wochenplan - 9be")
-		#for key in list(neunbe.keys()):
-		#	print(key)
-		#	pprint.pprint(neunbe[key])
-		pprint.pprint(["Wochenplan",mensa,tech,neunbe])
+		print('TODO - Wochenplan anzeigen')
 
 	else:	
 
@@ -50,162 +42,87 @@ def lunchprinter(NeunBE, Mensa, Tech, wholeweek=False, tomorrow=False):
 		else:
 			weekday = (datetime.date.today()+datetime.timedelta(days=1)).weekday()	
 		
-		if weekday == 0:
-			mensa = Mensa['Mon']
-			tech = Tech['Mon']
-			neunbe = NeunBE['Mon']
-			print("Montag", "\n", "Mensa:", "\n", mensa, "\n",
-			"TechCafe:", "\n", tech, "\n", "9b:", "\n", neunbe)
-		elif weekday == 1:
-			mensa = Mensa['Die']
-			tech = Tech['Die']
-			neunbe = NeunBE['Die']
-			print("Dienstag","\n","Mensa:","\n",mensa,"\n",
-			"TechCafe:","\n",tech,"\n","9b:","\n",neunbe)
-		elif weekday == 2:
-			mensa = Mensa['Mit']
-			tech = Tech['Mit']
-			neunbe = NeunBE['Mit']
-			print("Mittwoch","\n","Mensa:","\n",mensa,"\n",
-			"TechCafe:","\n",tech,"\n","9b:","\n",neunbe)
-		elif weekday == 3:
-			mensa = Mensa['Don']
-			tech = Tech['Don']
-			neunbe = NeunBE['Don']
-			print("Donnerstag","\n","Mensa:","\n",mensa,"\n",
-			"TechCafe:","\n",tech,"\n","9b:","\n",neunbe)
-		elif weekday == 4:
-			mensa = Mensa['Fre']
-			tech = Tech['Fre']
-			neunbe = NeunBE['Fre']	
-			print("Freitag","\n","Mensa:","\n",mensa,"\n",
-			"TechCafe:","\n",tech,"\n","9b:","\n",neunbe)
-		elif weekday > 4: 
-			print("Hoch die Hände Wochenede")
+		day = ['Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag','Sonntag'][weekday]
+		#print(day)		
+		if day == 'Samstag' or day == 'Sonntag':
+			print("Hoch die Hände Wochenende!")
+		else:
+			mensa = Mensa[weekday]
+			tech = Tech[weekday]
+			neunbe = NeunBE[weekday]	
+			print('TODO - Tagesmenü anzeigen')
+			
+########## 9b - the people who can't name files in a coherent way ###############################
 
-##################################################################################################
-
-urllib.request.urlretrieve("http://neunbe.at/pictures/45-111MENUE111--.jpg", "test.jpg") #9be FAILS a lot but seems to keep this name going for at least two consecutive weeks.
-
+#urllib.request.urlretrieve("http://neunbe.at/pictures/"+weeknumber+"-111MENUE111--.jpg", "test.jpg") #9be FAILS a lot but seems to keep this name going for at least two consecutive weeks.
 
 img = (Image.open('test.jpg'))
-area = (380,240,795,500)
+area = (380,240,795,500)   #these change from weeks to weekt unfortunatley, so they have to be adjusted manually every week
 img_crop = img.crop(area)
 #img_crop.show()
 
-area2 = (350,520,825,850)
+area2 = (350,520,825,850)  #these change from weeks to weekt unfortunatley, so they have to be adjusted manually every week
 img_crop2 = img.crop(area2)
 #img_crop2.show()
 
-
-
 #language option needs installation of file in usr/share/tessseract/4.00/tessdata
-#print(type(pytesseract.image_to_string(img_crop, lang='deu')))
+
 out = (pytesseract.image_to_string(img_crop, lang='deu', config='--psm 6'))
-#print(out)
 
-Mon = re.search('Montag((?s).*)Dienstag',out).group(1)
-Die = re.search('Dienstag((?s).*)Mittwoch',out).group(1)
-Mit = re.search('Mittwoch((?s).*)Donnerstag',out).group(1)
-Don = re.search('Donnerstag((?s).*)Freitag',out).group(1)
-Fre = re.search('Freitag((?s).*)',out).group(1)
 
-Mon = re.sub(" +"," ",Mon.replace("\n"," ").strip())
-Die = re.sub(" +"," ",Die.replace("\n"," ").strip())
-Mit = re.sub(" +"," ",Mit.replace("\n"," ").strip())
-Don = re.sub(" +"," ",Don.replace("\n"," ").strip())
-Fre = re.sub(" +"," ",Fre.replace("\n"," ").strip())
-
-#print(Mon)
-#print(Die)
-#print(Mit)
-#print(Don)
-#print(Fre)
+Mon = re.sub(" +", " ", re.search('Montag((?s).*)Dienstag', out).group(1).replace("\n"," ").strip())
+Die = re.sub(" +", " ", re.search('Dienstag((?s).*)Mittwoch', out).group(1).replace("\n"," ").strip())
+Mit = re.sub(" +", " ", re.search('Mittwoch((?s).*)Donnerstag', out).group(1).replace("\n"," ").strip())
+Don = re.sub(" +", " ", re.search('Donnerstag((?s).*)Freitag', out).group(1).replace("\n"," ").strip())
+Fre = re.sub(" +", " ", re.search('Freitag((?s).*)', out).group(1).replace("\n"," ").strip())
 
 out2 = (pytesseract.image_to_string(img_crop2, lang='deu',config='--psm 6'))
-#print(out2)
 
-MBurger = re.search('Monatsburger:((?s).*)Wochenburger',out2).group(1)
-WBurger = re.search('Wochenburger:((?s).*)Wochencurry',out2).group(1)
-MAktion = re.search('Wochencurry;((?s).*)',out2).group(1) #stupid 9b can't write
-MBurger = re.sub(" +"," ",MBurger.replace("\n"," ").strip())
-WBurger = re.sub(" +"," ",WBurger.replace("\n"," ").strip())
-MAktion = re.sub(" +"," ",MAktion.replace("\n"," ").strip())
+MBurger = re.sub(" +", " ", re.search('Monatsburger:((?s).*)Wochenburger', out2).group(1).replace("\n", " ").strip())
+WBurger = re.sub(" +", " ", re.search('Wochenburger:((?s).*)Wochencurry', out2).group(1).replace("\n", " ").strip())
+WCurry = re.sub(" +", " ", re.search('Wochencurry;((?s).*)', out2).group(1).replace("\n", " ").strip())  # stupid 9b can't write for shit  ; != :
 
-#print(MBurger)
-#print(WBurger)
-#print(MAktion)
-#Monatsaktion wurde schon wieder durch Wochencurry ersetzt... 
+daylist = [Mon,Die,Mit,Don,Fre]
+NeunB = np.ndarray((5,4),dtype=object)
 
-NeunB = {'Mon':{'Tagesteller':Mon,'Monatsburger':MBurger,'Wochenburger':WBurger,'Wochencurry':MAktion},'Die':{'Tagesteller':Die,'Monatsburger':MBurger,'Wochenburger':WBurger,'Wochencurry':MAktion},'Mit':{'Tagesteller':Mit,'Monatsburger':MBurger,'Wochenburger':WBurger,'Wochencurry':MAktion},'Don':{'Tagesteller':Don,'Monatsburger':MBurger,'Wochenburger':WBurger,'Wochencurry':MAktion},'Fre':{'Tagesteller':Fre,'Monatsburger':MBurger,'Wochenburger':WBurger,'Wochencurry':MAktion}}
+for ind in range(0,5):
+	NeunB[ind][0]=daylist[ind]
+	NeunB[ind][1]=MBurger
+	NeunB[ind][2]=WBurger
+	NeunB[ind][3]=WCurry
 
-###################################################################################################
-#menu.mensen.at//index/menu-pdf/locid/42?woy=45&year=2018
-urllib.request.urlretrieve("http://menu.mensen.at//index/menu-pdf/locid/42?woy=45&year=2018","test.pdf")
+######### MENSA = locid 42    ##############################################################
+
+urllib.request.urlretrieve("http://menu.mensen.at//index/menu-pdf/locid/42?woy="+weeknumber+"&year=2018","test.pdf")
 
 # Read pdf into DataFrame
 df = tabula.read_pdf("test.pdf", pages="all", lattice=True, guess=True, mulitple_tables=True ,output_format="json")
 
-#pprint.pprint(df[0]['data'][2][1]['text']) # [2 = montag] [1= Menü Classic]
-#pprint.pprint(df[2]['data'][1][1]['text']) # 1 = friday 1= menu classic
+Men = np.ndarray((5,3),dtype=object)
 
-men_mon_men = re.sub('(€ ?\d+\,\d{1,2})',"", df[0]['data'][2][1]['text'].replace("\r",", ")) 
-men_mon_veg = re.sub('(€ ?\d+\,\d{1,2})',"", df[0]['data'][2][2]['text'].replace("\r",", ")) 
-men_mon_tag = re.sub('(€ ?\d+\,\d{1,2})',"", df[0]['data'][2][3]['text'].replace("\r",", "))
+for jnd in range(0,5):
+	if jnd != 4:
+		Men[jnd][0]= re.sub('(€ ?\d+\,\d{1,2})', "", df[0]['data'][jnd+2][1]['text'].replace("\r", ", "))
+		Men[jnd][1]=re.sub('(€ ?\d+\,\d{1,2})', "", df[0]['data'][jnd+2][2]['text'].replace("\r", ", "))
+		Men[jnd][2]=re.sub('(€ ?\d+\,\d{1,2})', "", df[0]['data'][jnd+2][3]['text'].replace("\r", ", "))
+	else:
+		Men[jnd][0]= re.sub('(€ ?\d+\,\d{1,2})', "", df[2]['data'][1][1]['text'].replace("\r", ", "))
+		Men[jnd][1]=re.sub('(€ ?\d+\,\d{1,2})', "", df[2]['data'][1][2]['text'].replace("\r", ", "))
+		Men[jnd][2]=re.sub('(€ ?\d+\,\d{1,2})', "", df[2]['data'][1][3]['text'].replace("\r", ", "))
 
-men_die_men = re.sub('(€ ?\d+\,\d{1,2})',"", df[0]['data'][3][1]['text'].replace("\r",", "))
-men_die_veg = re.sub('(€ ?\d+\,\d{1,2})',"", df[0]['data'][3][2]['text'].replace("\r",", ")) 
-men_die_tag = re.sub('(€ ?\d+\,\d{1,2})',"", df[0]['data'][3][3]['text'].replace("\r",", "))
+######################### TECH = locid 55 ####################################################
 
-men_mit_men = re.sub('(€ ?\d+\,\d{1,2})',"", df[0]['data'][4][1]['text'].replace("\r",", ")) 
-men_mit_veg = re.sub('(€ ?\d+\,\d{1,2})',"", df[0]['data'][4][2]['text'].replace("\r",", ")) 
-men_mit_tag = re.sub('(€ ?\d+\,\d{1,2})',"", df[0]['data'][4][3]['text'].replace("\r",", "))
-
-men_don_men = re.sub('(€ ?\d+\,\d{1,2})',"", df[0]['data'][5][1]['text'].replace("\r",", ")) 
-men_don_veg = re.sub('(€ ?\d+\,\d{1,2})',"", df[0]['data'][5][2]['text'].replace("\r",", ")) 
-men_don_tag = re.sub('(€ ?\d+\,\d{1,2})',"", df[0]['data'][5][3]['text'].replace("\r",", "))
-
-men_fre_men = re.sub('(€ ?\d+\,\d{1,2})',"", df[2]['data'][1][1]['text'].replace("\r",", ")) 
-men_fre_veg = re.sub('(€ ?\d+\,\d{1,2})',"", df[2]['data'][1][2]['text'].replace("\r",", ")) 
-men_fre_tag = re.sub('(€ ?\d+\,\d{1,2})',"", df[2]['data'][1][3]['text'].replace("\r",", "))
-
-Men={'Mon':{'Menü Classic': men_mon_men,'Vegetarisch': men_mon_veg,'Tagesteller': men_mon_tag},'Die':{'Menü Classic': men_die_men,'Vegetarisch': men_die_veg,'Tagesteller': men_die_tag},'Mit':{'Menü Classic': men_mit_men,'Vegetarisch': men_mit_veg,'Tagesteller': men_mit_tag},'Don':{'Menü Classic': men_don_men,'Vegetarisch': men_don_veg,'Tagesteller': men_don_tag},'Fre':{'Menü Classic': men_fre_men,'Vegetarisch': men_fre_veg,'Tagesteller': men_fre_tag}}
-
-#pprint.pprint(Men)
-######################### TECH ####################################################
-
-urllib.request.urlretrieve("http://menu.mensen.at//index/menu-pdf/locid/55?woy=45&year=2018","test2.pdf")
+urllib.request.urlretrieve("http://menu.mensen.at//index/menu-pdf/locid/55?woy="+weeknumber+"&year=2018","test2.pdf")
 
 df2 = tabula.read_pdf("test2.pdf", pages="all", lattice=True, guess=True, mulitple_tables=True ,output_format="json")
-#pprint.pprint(df2[0]['data'][2][1]['text'])
 
-tec_mon_tag = re.sub('(€ ?\d+\,\d{1,2})',"", re.sub(' *\((.*?)\)',"",df2[0]['data'][2][1]['text'].replace("\r",", "))) 
-tec_mon_veg = re.sub('(€ ?\d+\,\d{1,2})',"", re.sub(' *\((.*?)\)',"",df2[0]['data'][2][2]['text'].replace("\r",", "))) 
-tec_mon_pas = re.sub('(€ ?\d+\,\d{1,2})',"", re.sub(' *\((.*?)\)',"",df2[0]['data'][2][3]['text'].replace("\r",", ")))
+Tec = np.ndarray((5,3),dtype=object)
 
-tec_die_tag = re.sub('(€ ?\d+\,\d{1,2})',"", re.sub(' *\((.*?)\)',"",df2[0]['data'][3][1]['text'].replace("\r",", "))) 
-tec_die_veg = re.sub('(€ ?\d+\,\d{1,2})',"", re.sub(' *\((.*?)\)',"",df2[0]['data'][3][2]['text'].replace("\r",", "))) 
-tec_die_pas = re.sub('(€ ?\d+\,\d{1,2})',"", re.sub(' *\((.*?)\)',"",df2[0]['data'][3][3]['text'].replace("\r",", ")))
-
-tec_mit_tag = re.sub('(€ ?\d+\,\d{1,2})',"", re.sub(' *\((.*?)\)',"",df2[0]['data'][4][1]['text'].replace("\r",", "))) 
-tec_mit_veg = re.sub('(€ ?\d+\,\d{1,2})',"", re.sub(' *\((.*?)\)',"",df2[0]['data'][4][2]['text'].replace("\r",", "))) 
-tec_mit_pas = re.sub('(€ ?\d+\,\d{1,2})',"", re.sub(' *\((.*?)\)',"",df2[0]['data'][4][3]['text'].replace("\r",", ")))
-
-tec_don_tag = re.sub('(€ ?\d+\,\d{1,2})',"", re.sub(' *\((.*?)\)',"",df2[0]['data'][5][1]['text'].replace("\r",", "))) 
-tec_don_veg = re.sub('(€ ?\d+\,\d{1,2})',"", re.sub(' *\((.*?)\)',"",df2[0]['data'][5][2]['text'].replace("\r",", "))) 
-tec_don_pas = re.sub('(€ ?\d+\,\d{1,2})',"", re.sub(' *\((.*?)\)',"",df2[0]['data'][5][3]['text'].replace("\r",", ")))
-
-tec_fre_tag = re.sub('(€ ?\d+\,\d{1,2})',"", re.sub(' *\((.*?)\)',"",df2[0]['data'][6][1]['text'].replace("\r",", "))) 
-tec_fre_veg = re.sub('(€ ?\d+\,\d{1,2})',"", re.sub(' *\((.*?)\)',"",df2[0]['data'][6][2]['text'].replace("\r",", "))) 
-tec_fre_pas = re.sub('(€ ?\d+\,\d{1,2})',"", re.sub(' *\((.*?)\)',"",df2[0]['data'][6][3]['text'].replace("\r",", ")))
-
-Tec={'Mon':{'Tagesteller': tec_mon_tag,'Vegetarisch': tec_mon_veg,'Pasta': tec_mon_pas},'Die':{'Tagesteller': tec_die_tag,'Vegetarisch': tec_die_veg,'Pasta': tec_die_pas},'Mit':{'Tagesteller': tec_mit_tag,'Vegetarisch': tec_mit_veg,'Pasta': tec_mit_pas},'Don':{'Tagesteller': tec_don_tag,'Vegetarisch': tec_don_veg,'Pasta': tec_don_pas},'Fre':{'Tagesteller': tec_fre_tag,'Vegetarisch': tec_fre_veg,'Pasta': tec_fre_pas}}
-
-#pprint.pprint(Tec)
-#print(Tec['Mon']['Tagesteller'])   # nice finally
+for knd in range(0,5):
+	Tec[knd][0] = re.sub('(€ ?\d+\,\d{1,2})', "", re.sub(' *\((.*?)\)', "", df2[0]['data'][knd+2][1]['text'].replace("\r", ", "))) 
+	Tec[knd][1] = re.sub('(€ ?\d+\,\d{1,2})', "", re.sub(' *\((.*?)\)', "", df2[0]['data'][knd+2][2]['text'].replace("\r", ", ")))
+	Tec[knd][2] = re.sub('(€ ?\d+\,\d{1,2})', "", re.sub(' *\((.*?)\)', "", df2[0]['data'][knd+2][3]['text'].replace("\r", ", ")))
 
 ###################################################################################################
-#print the shit for the given day:
 
-#lunchprinter(NeunB,Men,Tec,True)
-lunchprinter(NeunB,Men,Tec,wholeweek=False,tomorrow=False)	
+lunchprinter(NeunB,Men,Tec,wholeweek=False,tomorrow=False) #wholeweek and tomorrow are optional and False by default 	
