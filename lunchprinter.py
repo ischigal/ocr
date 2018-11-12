@@ -28,7 +28,7 @@ def lunchprinter(NeunBE, Mensa, Tech, wholeweek=False, tomorrow=False):
 	
 	mensa_names = ['Menü Classic: \t', 'Vegetarisch: \t', 'Tagesteller: \t']
 	tech_names = ['Tagesteller: \t', 'Vegetarisch: \t', 'Pasta: \t\t']
-	neunbe_names = ['Tagesmenü: \t', 'Monatsburger: \t', 'Wochenburger: \t', 'Wochencurry: \t']
+	neunbe_names = ['Tagesmenü: \t', 'Monatsburger: \t', 'Wochenburger: \t', 'Wochenaktion: \t']
 	days = ['Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag','Sonntag']
 
 	if wholeweek == True:
@@ -94,12 +94,13 @@ def lunchprinter(NeunBE, Mensa, Tech, wholeweek=False, tomorrow=False):
 neunB_menu_file = "neunB_menu_week"+weeknumber+".jpg"
 
 try: 
-	urllib.request.urlretrieve("http://neunbe.at/pictures/"+weeknumber+"-111MENUE111--.jpg", neunB_menu_file) #9b only uploads the week's menu on late sunday early monday!
+	#urllib.request.urlretrieve("http://neunbe.at/pictures/"+weeknumber+"-111MENUE111--.jpg", neunB_menu_file) #9b only uploads the week's menu on late sunday early monday!
+	urllib.request.urlretrieve("http://neunbe.at/pictures/KW"+weeknumber+".jpg", neunB_menu_file)
 except:
 	neunB_menu_file = "neunB_menu_week45.jpg"    # use a template menu from week 45 so the rest at least works
 
 img = (Image.open(neunB_menu_file))
-area = (380,240,795,500)   #these change from week to week unfortunatley, so they have to be adjusted manually every week
+area = (380,200,825,500)   #these change from week to week unfortunatley, so they have to be adjusted manually every week
 img_crop = img.crop(area)
 #img_crop.show()
 
@@ -119,8 +120,8 @@ Fre = re.sub(" +", " ", re.search('Freitag((?s).*)', out).group(1).replace("\n",
 out2 = (pytesseract.image_to_string(img_crop2, lang='deu',config='--psm 6'))
 
 MBurger = re.sub(" +", " ", re.search('Monatsburger:((?s).*)Wochenburger', out2).group(1).replace("\n", " ").strip())
-WBurger = re.sub(" +", " ", re.search('Wochenburger:((?s).*)Wochencurry', out2).group(1).replace("\n", " ").strip())
-WCurry  = re.sub(" +", " ", re.search('Wochencurry;((?s).*)', out2).group(1).replace("\n", " ").strip())  # stupid 9b can't write for shit  ; != :
+WBurger = re.sub(" +", " ", re.search('Wochenburger:((?s).*)Wochenaktion', out2).group(1).replace("\n", " ").strip())
+WAktion  = re.sub(" +", " ", re.search('Wochenaktion:((?s).*)', out2).group(1).replace("\n", " ").strip())  # stupid 9b can't write for shit  ; != :
 
 daylist = [Mon,Die,Mit,Don,Fre]
 NeunB = np.ndarray((5,4),dtype=object)
@@ -129,7 +130,7 @@ for ind in range(0,5):
 	NeunB[ind][0] = daylist[ind]
 	NeunB[ind][1] = MBurger
 	NeunB[ind][2] = WBurger
-	NeunB[ind][3] = WCurry
+	NeunB[ind][3] = WAktion
 
 ######### MENSA = locid 42    ##############################################################
 mensa_file = "mensa_menu_week"+weeknumber+".pdf"
