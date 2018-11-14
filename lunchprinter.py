@@ -8,7 +8,6 @@ import pytesseract
 import re
 import datetime
 import tabula
-import pprint
 import numpy as np
 
 ###################################################################################################
