@@ -1,18 +1,18 @@
 try:
     from PIL import Image
 except ImportError:
-    import Image
+    import Image		# Imagick image viewer and stuff, also needed for screenshots
 
-import urllib.request
-import pytesseract
-import re
-import datetime
-import tabula
-import numpy as np
+import urllib.request		# for reading URLs
+import pytesseract      	# it is important to install tesseract 4.0 which is not trivial for Ubuntu < 18.04 as default would there 					be version 3. One also hast to install libtesseract-dev from terminal and of course pytesseract via pip
+import re			# regual expressions tool for python
+import datetime			# for current week number and week day
+import tabula			# to read pdfs, important to install tabula-py and not tabula via pip
+import numpy as np		# for array operations
 
 ###################################################################################################
 
-#tesseract location
+#tesseract location (of executable/command!); 
 pytesseract.pytesseract.tesseract_cmd = r'/usr/bin/tesseract'
 
 #set week in year
@@ -28,7 +28,7 @@ def lunchprinter(NeunBE, Mensa, Tech, wholeweek=False, tomorrow=False):
 	mensa_names = ['Menü Classic: \t', 'Vegetarisch: \t', 'Tagesteller: \t']
 	tech_names = ['Tagesteller: \t', 'Vegetarisch: \t', 'Pasta: \t\t']
 	neunbe_names = ['Tagesmenü: \t', 'Monatsburger: \t', 'Wochenburger: \t', 'Wochenaktion: \t']
-	days = ['Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag','Sonntag']
+	days = ['Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag','Sonntag'] 
 
 	if wholeweek == True:
 		mensa = Mensa
@@ -77,7 +77,6 @@ def lunchprinter(NeunBE, Mensa, Tech, wholeweek=False, tomorrow=False):
 			tech = Tech[weekday]
 			neunbe = NeunBE[weekday]	
 			
-			#print('TODO - Tagesmenü anzeigen')
 			print("--------------------------- "+day+" ---------------------------", "\n")
 			print("------------ Mensa ------------", "\n")
 			for i in range(0,len(mensa)):
@@ -93,22 +92,24 @@ def lunchprinter(NeunBE, Mensa, Tech, wholeweek=False, tomorrow=False):
 neunB_menu_file = "neunB_menu_week"+weeknumber+".jpg"
 
 try: 
-	#urllib.request.urlretrieve("http://neunbe.at/pictures/"+weeknumber+"-111MENUE111--.jpg", neunB_menu_file) #9b only uploads the week's menu on late sunday early monday!
-	urllib.request.urlretrieve("http://neunbe.at/pictures/KW"+weeknumber+".jpg", neunB_menu_file)
+	urllib.request.urlretrieve("http://neunbe.at/pictures/KW"+weeknumber+".jpg", neunB_menu_file) 
+	# often name changes so check before relying on information generated from this
 except:
-	neunB_menu_file = "neunB_menu_week45.jpg"    # use a template menu from week 45 so the rest at least works
+	neunB_menu_file = "neunB_menu_week46.jpg"    # use a template menu from week 46 so the rest at least works
 
 img = Image.open(neunB_menu_file)
 area = (380,200,825,500)   #these change from week to week unfortunatley, so they have to be adjusted manually every week
 img_crop = img.crop(area)
-#img_crop.show()
+#img_crop.show()	# shows the image from which text is extracted, has to show monday to friday with menu but nothing else
 
 area2 = (350,520,825,850)  #these change from week to week unfortunatley, so they have to be adjusted manually every week
 img_crop2 = img.crop(area2)
-#img_crop2.show()
+#img_crop2.show() 	# shows the image from which text is extracted, has to show specials but not the menu or other stuff
 
-#language option needs installation of file in usr/share/tessseract/4.00/tessdata       --psm 6 is a command line argument for tesseract to order tables correctly (not always needed, check every week)
-out = pytesseract.image_to_string(img_crop, lang='deu', config='--psm 6')
+       
+out = pytesseract.image_to_string(img_crop, lang="deu", config='--psm 6')
+# language option needs installation of file in usr/share/tessseract/4.00/tessdata
+# --psm 6 is argument/option for tesseract to sort tables differently (not always needed, but seems to do nothing bad if not needed)
 
 Mon = re.sub(" +", " ", re.search('Montag((?s).*)Dienstag', out).group(1).replace("\n"," ").replace(" , ",", ").strip())
 Die = re.sub(" +", " ", re.search('Dienstag((?s).*)Mittwoch', out).group(1).replace("\n"," ").replace(" , ",", ").strip())
@@ -120,13 +121,14 @@ out2 = pytesseract.image_to_string(img_crop2, lang='deu',config='--psm 6')
 
 MBurger = re.sub(" +", " ", re.search('Monatsburger:((?s).*)Wochenburger', out2).group(1).replace("\n", " ").replace(" , ",", ").strip())
 WBurger = re.sub(" +", " ", re.search('Wochenburger:((?s).*)Wochenaktion', out2).group(1).replace("\n", " ").replace(" , ",", ").strip())
-WAktion  = re.sub(" +", " ", re.search('Wochenaktion:((?s).*)', out2).group(1).replace("\n", " ").replace(" , ",", ").strip())  # stupid 9b can't write for shit  ; != :
+WAktion  = re.sub(" +", " ", re.search('Wochenaktion:((?s).*)', out2).group(1).replace("\n", " ").replace(" , ",", ").strip())  
+#WAktion often changes actual name --> check if strings need to be adjusted for consistency
 
 daylist = [Mon,Die,Mit,Don,Fre]
 NeunB = np.ndarray((5,4),dtype=object)
 
-for ind in range(0,5):
-	NeunB[ind][0] = daylist[ind]
+for ind in range(0,5):		#add daily menu and specials which are available every day
+	NeunB[ind][0] = daylist[ind] 
 	NeunB[ind][1] = MBurger
 	NeunB[ind][2] = WBurger
 	NeunB[ind][3] = WAktion
@@ -135,7 +137,7 @@ for ind in range(0,5):
 mensa_file = "mensa_menu_week"+weeknumber+".pdf"
 urllib.request.urlretrieve("http://menu.mensen.at//index/menu-pdf/locid/42?woy="+weeknumber+"&year=2018",mensa_file)
 
-# Read pdf into DataFrame
+# Read pdf into json style DataFrame
 df = tabula.read_pdf(mensa_file, pages="all", lattice=True, guess=True, mulitple_tables=True ,output_format="json")
 
 Men = np.ndarray((5,3),dtype=object)
@@ -147,11 +149,13 @@ for jnd in range(0,5):
 	else:
 		for i in range(0,3):
 			Men[jnd][i] = re.sub('(€ ?\d+\,\d{1,2})', "", df[2]['data'][1][i+1]['text'].replace("\r", ", "))
+#regex used to remove prices and for formatting of the strings
 
 ######################### TECH = locid 55 ####################################################
 tech_file = "tech_menu_week"+weeknumber+".pdf"
 urllib.request.urlretrieve("http://menu.mensen.at//index/menu-pdf/locid/55?woy="+weeknumber+"&year=2018",tech_file)
 
+# similar as for mensa
 df2 = tabula.read_pdf(tech_file, pages="all", lattice=True, guess=True, mulitple_tables=True ,output_format="json")
 
 Tec = np.ndarray((5,3),dtype=object)
@@ -159,6 +163,7 @@ Tec = np.ndarray((5,3),dtype=object)
 for knd in range(0,5):
 	for i in range(0,3):
 		Tec[knd][i] = re.sub('(€ ?\d+\,\d{1,2})', "", re.sub(' *\((.*?)\)', "", df2[0]['data'][knd+2][i+1]['text'].replace("\r", " ")))
+# here additional regex search for things in brackets as these are usually(!) just allergy informations
 
 ###################################################################################################
 
