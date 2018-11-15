@@ -107,7 +107,7 @@ area2 = (350,520,825,850)  #these change from week to week unfortunatley, so the
 img_crop2 = img.crop(area2)
 #img_crop2.show()
 
-#language option needs installation of file in usr/share/tessseract/4.00/tessdata       --psm 6 is a command line argument for tesseract to order tables correctly (not always needed, checke every week)
+#language option needs installation of file in usr/share/tessseract/4.00/tessdata       --psm 6 is a command line argument for tesseract to order tables correctly (not always needed, check every week)
 out = pytesseract.image_to_string(img_crop, lang='deu', config='--psm 6')
 
 Mon = re.sub(" +", " ", re.search('Montag((?s).*)Dienstag', out).group(1).replace("\n"," ").replace(" , ",", ").strip())
