@@ -92,17 +92,19 @@ def lunchprinter(NeunBE, Mensa, Tech, wholeweek=False, tomorrow=False):
 neunB_menu_file = "neunB_menu_week"+weeknumber+".jpg"
 
 try: 
-	urllib.request.urlretrieve("http://neunbe.at/pictures/KW"+weeknumber+".jpg", neunB_menu_file) 
+	urllib.request.urlretrieve('http://neunbe.at/pictures/KW'+weeknumber+'-2018-Menue.jpg', neunB_menu_file)	
+	#urllib.request.urlretrieve("http://neunbe.at/pictures/KW"+weeknumber+".jpg", neunB_menu_file) 
 	# often name changes so check before relying on information generated from this
+	# new (3rd) URL style .../KW47-2018-Menue.jpg
 except:
 	neunB_menu_file = "neunB_menu_week46.jpg"    # use a template menu from week 46 so the rest at least works
 
 img = Image.open(neunB_menu_file)
-area = (380,200,825,500)   #these change from week to week unfortunatley, so they have to be adjusted manually every week
+area = (520,250,1050,670)   #these change from week to week unfortunatley, so they have to be adjusted manually every week
 img_crop = img.crop(area)
 #img_crop.show()	# shows the image from which text is extracted, has to show monday to friday with menu but nothing else
 
-area2 = (350,520,825,850)  #these change from week to week unfortunatley, so they have to be adjusted manually every week
+area2 = (500,670,1115,1030)  #these change from week to week unfortunatley, so they have to be adjusted manually every week
 img_crop2 = img.crop(area2)
 #img_crop2.show() 	# shows the image from which text is extracted, has to show specials but not the menu or other stuff
 
@@ -118,10 +120,10 @@ Don = re.sub(" +", " ", re.search('Donnerstag((?s).*)Freitag', out).group(1).rep
 Fre = re.sub(" +", " ", re.search('Freitag((?s).*)', out).group(1).replace("\n"," ").replace(" , ",", ").strip())
 
 out2 = pytesseract.image_to_string(img_crop2, lang='deu',config='--psm 6')
-
+#print(out2)
 MBurger = re.sub(" +", " ", re.search('Monatsburger:((?s).*)Wochenburger', out2).group(1).replace("\n", " ").replace(" , ",", ").strip())
 WBurger = re.sub(" +", " ", re.search('Wochenburger:((?s).*)Wochenaktion', out2).group(1).replace("\n", " ").replace(" , ",", ").strip())
-WAktion  = re.sub(" +", " ", re.search('Wochenaktion:((?s).*)', out2).group(1).replace("\n", " ").replace(" , ",", ").strip())  
+WAktion  = re.sub(" +", " ", re.search('Wochenaktion;((?s).*)', out2).group(1).replace("\n", " ").replace(" , ",", ").strip())  
 #WAktion often changes actual name --> check if strings need to be adjusted for consistency
 
 daylist = [Mon,Die,Mit,Don,Fre]
