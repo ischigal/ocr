@@ -99,7 +99,7 @@ try:
 	# http://neunbe.at/pictures/2018-KW-48.jpg    --> 4th style in 4 weeks
 except:
 	neunB_menu_file = "neunB_menu_week46.jpg"    # use a template menu from week 46 so the rest at least works
-	print("9b Menǘ nicht verfügbar, eingetragenes Menü vermutlich falsch"
+	print("9b Menǘ nicht verfügbar, eingetragenes Menü vermutlich falsch")
 
 img = Image.open(neunB_menu_file)
 area = (450,210,900,570)   #these change from week to week unfortunatley, so they have to be adjusted manually every week
