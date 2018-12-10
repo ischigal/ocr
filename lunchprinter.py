@@ -92,8 +92,11 @@ def lunchprinter(NeunBE, Mensa, Tech, wholeweek=False, tomorrow=False):
 neunB_menu_file = "neunB_menu_week"+weeknumber+".jpg"
 
 try: 
-	urllib.request.urlretrieve('http://neunbe.at/pictures/2018-KW-'+weeknumber+'.jpg', neunB_menu_file)	
-	#urllib.request.urlretrieve("http://neunbe.at/pictures/KW"+weeknumber+".jpg", neunB_menu_file) 
+	# current format: http://neunbe.at/pictures/KW-50-2018.jpg
+	#urllib.request.urlretrieve('http://neunbe.at/pictures/'+weeknumber+'---111MENUE111--.jpg', neunB_menu_file)
+	#http://neunbe.at/pictures/49---111MENUE111--.jpg
+	#urllib.request.urlretrieve('http://neunbe.at/pictures/2018-KW-'+weeknumber+'.jpg', neunB_menu_file)	
+	urllib.request.urlretrieve("http://neunbe.at/pictures/KW-"+weeknumber+"-2018.jpg", neunB_menu_file) 
 	# often name changes so check before relying on information generated from this
 	# new (3rd) URL style .../KW47-2018-Menue.jpg
 	# http://neunbe.at/pictures/2018-KW-48.jpg    --> 4th style in 4 weeks
@@ -102,11 +105,11 @@ except:
 	print("9b Menǘ nicht verfügbar, eingetragenes Menü vermutlich falsch")
 
 img = Image.open(neunB_menu_file)
-area = (450,210,900,570)   #these change from week to week unfortunatley, so they have to be adjusted manually every week
+area = (420,210,900,520)   #these change from week to week unfortunatley, so they have to be adjusted manually every week
 img_crop = img.crop(area)
 #img_crop.show()	# shows the image from which text is extracted, has to show monday to friday with menu but nothing else
 
-area2 = (450,580,900,900)  #these change from week to week unfortunatley, so they have to be adjusted manually every week
+area2 = (400,530,900,880)  #these change from week to week unfortunatley, so they have to be adjusted manually every week
 img_crop2 = img.crop(area2)
 #img_crop2.show() 	# shows the image from which text is extracted, has to show specials but not the menu or other stuff
 
@@ -123,8 +126,8 @@ Fre = re.sub(" +", " ", re.search('Freitag((?s).*)', out).group(1).replace("\n",
 out2 = pytesseract.image_to_string(img_crop2, lang='deu',config='--psm 6')
 #print(out2)
 MBurger = re.sub(" +", " ", re.search('Monatsburger:((?s).*)Wochenburger', out2).group(1).replace("\n", " ").replace(" , ",", ").strip())
-#WBurger = re.sub(" +", " ", re.search('Wochenburger:((?s).*)Wochenaktion', out2).group(1).replace("\n", " ").replace(" , ",", ").strip())
-WBurger = re.sub(" +", " ", re.search('\):((?s).*)Wochenaktion', out2).group(1).replace("\n", " ").replace(" , ",", ").strip())
+WBurger = re.sub(" +", " ", re.search('Wochenburger:((?s).*)Wochenaktion', out2).group(1).replace("\n", " ").replace(" , ",", ").strip())
+#WBurger = re.sub(" +", " ", re.search('\):((?s).*)Wochenaktion', out2).group(1).replace("\n", " ").replace(" , ",", ").strip())
 WAktion  = re.sub(" +", " ", re.search('Wochenaktion:((?s).*)', out2).group(1).replace("\n", " ").replace(" , ",", ").strip())  
 #WAktion often changes actual name --> check if strings need to be adjusted for consistency
 
@@ -139,26 +142,38 @@ for ind in range(0,5):		#add daily menu and specials which are available every d
 
 ######### MENSA = locid 42    ##############################################################
 mensa_file = "mensa_menu_week"+weeknumber+".pdf"
-urllib.request.urlretrieve("http://menu.mensen.at//index/menu-pdf/locid/42?woy="+weeknumber+"&year=2018",mensa_file)
-
+try:
+	urllib.request.urlretrieve("http://menu.mensen.at//index/menu-pdf/locid/42?woy="+weeknumber+"&year=2018",mensa_file)
+except:
+	mensa_file = "mensa_menu_week48.pdf"	
+	print("Mensa Menü nicht verfügbar, eingetragenes Menü vermutlich falsch")
 # Read pdf into json style DataFrame
 df = tabula.read_pdf(mensa_file, pages="all", lattice=True, guess=True, mulitple_tables=True ,output_format="json")
 
 Men = np.ndarray((5,3),dtype=object)
 
 for jnd in range(0,5):
-	if jnd != 4:
-		for i in range(0,3):
+	#only if menu pdf has 2 pages:
+	#if jnd != 4:
+	#	for i in range(0,3):
+	#		Men[jnd][i] = re.sub('(€ ?\d+\,\d{1,2})', "", df[0]['data'][jnd+2][i+1]['text'].replace("\r", " "))
+	#else:
+	#	for i in range(0,3):
+	#		Men[jnd][i] = re.sub('(€ ?\d+\,\d{1,2})', "", df[2]['data'][1][i+1]['text'].replace("\r", ", "))
+	
+	for i in range(0,3):
+
 			Men[jnd][i] = re.sub('(€ ?\d+\,\d{1,2})', "", df[0]['data'][jnd+2][i+1]['text'].replace("\r", " "))
-	else:
-		for i in range(0,3):
-			Men[jnd][i] = re.sub('(€ ?\d+\,\d{1,2})', "", df[2]['data'][1][i+1]['text'].replace("\r", ", "))
+
 #regex used to remove prices and for formatting of the strings
 
 ######################### TECH = locid 55 ####################################################
 tech_file = "tech_menu_week"+weeknumber+".pdf"
-urllib.request.urlretrieve("http://menu.mensen.at//index/menu-pdf/locid/55?woy="+weeknumber+"&year=2018",tech_file)
-
+try:
+	urllib.request.urlretrieve("http://menu.mensen.at//index/menu-pdf/locid/55?woy="+weeknumber+"&year=2018",tech_file)
+except: 
+	tech_file = "tech_menu_week48.pdf"	
+	print("TechCafe Menü nicht verfügbar, eingetragenes Menü vermutlich falsch")
 # similar as for mensa
 df2 = tabula.read_pdf(tech_file, pages="all", lattice=True, guess=True, mulitple_tables=True ,output_format="json")
 
