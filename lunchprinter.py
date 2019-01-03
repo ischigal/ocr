@@ -9,6 +9,7 @@ import re			# regual expressions tool for python
 import datetime			# for current week number and week day
 import tabula			# to read pdfs, important to install tabula-py and not tabula via pip
 import numpy as np		# for array operations
+from termcolor import colored 	# for colored terminal output
 
 ###################################################################################################
 
@@ -96,26 +97,32 @@ try:
 	#urllib.request.urlretrieve('http://neunbe.at/pictures/'+weeknumber+'---111MENUE111--.jpg', neunB_menu_file)
 	#http://neunbe.at/pictures/49---111MENUE111--.jpg
 	#urllib.request.urlretrieve('http://neunbe.at/pictures/2018-KW-'+weeknumber+'.jpg', neunB_menu_file)	
-	urllib.request.urlretrieve("http://neunbe.at/pictures/KW-"+weeknumber+"-2018.jpg", neunB_menu_file) 
+	urllib.request.urlretrieve("http://neunbe.at/pictures/1111-9b-KW-"+weeknumber+"-2018.jpg", neunB_menu_file) 
 	# often name changes so check before relying on information generated from this
 	# new (3rd) URL style .../KW47-2018-Menue.jpg
 	# http://neunbe.at/pictures/2018-KW-48.jpg    --> 4th style in 4 weeks
+	#http://neunbe.at/pictures/1111-9b-KW-51-2018.jpg
 except:
-	neunB_menu_file = "neunB_menu_week46.jpg"    # use a template menu from week 46 so the rest at least works
-	print("9b Menǘ nicht verfügbar, eingetragenes Menü vermutlich falsch")
+	neunB_menu_file = "neunB_menu_week47.jpg"    # use a template menu from week 47 so the rest at least works
+	# needs: 
+	# area = (520,250,1150,650)   
+	# area2 = (520,650,1150,1200) 
+	print(colored("9b Menǘ nicht verfügbar, eingetragenes Menü vermutlich falsch",'red'))
 
 img = Image.open(neunB_menu_file)
-area = (420,210,900,520)   #these change from week to week unfortunatley, so they have to be adjusted manually every week
+area = (520,250,1150,650)   #these change from week to week unfortunatley, so they have to be adjusted manually every week
 img_crop = img.crop(area)
 #img_crop.show()	# shows the image from which text is extracted, has to show monday to friday with menu but nothing else
 
-area2 = (400,530,900,880)  #these change from week to week unfortunatley, so they have to be adjusted manually every week
+area2 = (520,650,1150,1200)  #these change from week to week unfortunatley, so they have to be adjusted manually every week
 img_crop2 = img.crop(area2)
 #img_crop2.show() 	# shows the image from which text is extracted, has to show specials but not the menu or other stuff
 
 out = pytesseract.image_to_string(img_crop, lang="deu", config='--psm 6')
 # language option needs installation of file in usr/share/tessseract/4.00/tessdata
 # --psm 6 is argument/option for tesseract to sort tables differently (not always needed, but seems to do nothing bad if not needed)
+
+#print(out)
 
 Mon = re.sub(" +", " ", re.search('Montag((?s).*)Dienstag', out).group(1).replace("\n"," ").replace(" , ",", ").strip())
 Die = re.sub(" +", " ", re.search('Dienstag((?s).*)Mittwoch', out).group(1).replace("\n"," ").replace(" , ",", ").strip())
@@ -125,6 +132,7 @@ Fre = re.sub(" +", " ", re.search('Freitag((?s).*)', out).group(1).replace("\n",
 
 out2 = pytesseract.image_to_string(img_crop2, lang='deu',config='--psm 6')
 #print(out2)
+
 MBurger = re.sub(" +", " ", re.search('Monatsburger:((?s).*)Wochenburger', out2).group(1).replace("\n", " ").replace(" , ",", ").strip())
 WBurger = re.sub(" +", " ", re.search('Wochenburger:((?s).*)Wochenaktion', out2).group(1).replace("\n", " ").replace(" , ",", ").strip())
 #WBurger = re.sub(" +", " ", re.search('\):((?s).*)Wochenaktion', out2).group(1).replace("\n", " ").replace(" , ",", ").strip())
@@ -146,7 +154,7 @@ try:
 	urllib.request.urlretrieve("http://menu.mensen.at//index/menu-pdf/locid/42?woy="+weeknumber+"&year=2018",mensa_file)
 except:
 	mensa_file = "mensa_menu_week48.pdf"	
-	print("Mensa Menü nicht verfügbar, eingetragenes Menü vermutlich falsch")
+	print(colored("Mensa Menü nicht verfügbar, eingetragenes Menü vermutlich falsch",'red'))
 # Read pdf into json style DataFrame
 df = tabula.read_pdf(mensa_file, pages="all", lattice=True, guess=True, mulitple_tables=True ,output_format="json")
 
@@ -173,7 +181,7 @@ try:
 	urllib.request.urlretrieve("http://menu.mensen.at//index/menu-pdf/locid/55?woy="+weeknumber+"&year=2018",tech_file)
 except: 
 	tech_file = "tech_menu_week48.pdf"	
-	print("TechCafe Menü nicht verfügbar, eingetragenes Menü vermutlich falsch")
+	print(colored("TechCafe Menü nicht verfügbar, eingetragenes Menü vermutlich falsch",'red'))
 # similar as for mensa
 df2 = tabula.read_pdf(tech_file, pages="all", lattice=True, guess=True, mulitple_tables=True ,output_format="json")
 
