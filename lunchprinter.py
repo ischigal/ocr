@@ -97,7 +97,10 @@ try:
 	#urllib.request.urlretrieve('http://neunbe.at/pictures/'+weeknumber+'---111MENUE111--.jpg', neunB_menu_file)
 	#http://neunbe.at/pictures/49---111MENUE111--.jpg
 	#urllib.request.urlretrieve('http://neunbe.at/pictures/2018-KW-'+weeknumber+'.jpg', neunB_menu_file)	
-	urllib.request.urlretrieve("http://neunbe.at/pictures/1111-9b-KW-"+weeknumber+"-2018.jpg", neunB_menu_file) 
+	#urllib.request.urlretrieve("http://neunbe.at/pictures/1111-9b-KW-"+weeknumber+"-2018.jpg", neunB_menu_file) 
+	urllib.request.urlretrieve("http://neunbe.at/pictures/9b---menue-0"+weeknumber+"-2019.jpg", neunB_menu_file) 
+	#http://neunbe.at/pictures/9b---menue-03-2019.jpg
+	#http://neunbe.at/pictures/9b---menue-02-2019.jpg
 	# often name changes so check before relying on information generated from this
 	# new (3rd) URL style .../KW47-2018-Menue.jpg
 	# http://neunbe.at/pictures/2018-KW-48.jpg    --> 4th style in 4 weeks
@@ -110,15 +113,15 @@ except:
 	print(colored("9b Menǘ nicht verfügbar, eingetragenes Menü vermutlich falsch",'red'))
 
 img = Image.open(neunB_menu_file)
-area = (520,250,1150,650)   #these change from week to week unfortunatley, so they have to be adjusted manually every week
+area = (550,330,1225,900)   #these change from week to week unfortunatley, so they have to be adjusted manually every week
 img_crop = img.crop(area)
 #img_crop.show()	# shows the image from which text is extracted, has to show monday to friday with menu but nothing else
 
-area2 = (520,650,1150,1200)  #these change from week to week unfortunatley, so they have to be adjusted manually every week
+area2 = (550,900,1275,1225)  #these change from week to week unfortunatley, so they have to be adjusted manually every week
 img_crop2 = img.crop(area2)
 #img_crop2.show() 	# shows the image from which text is extracted, has to show specials but not the menu or other stuff
 
-out = pytesseract.image_to_string(img_crop, lang="deu", config='--psm 6')
+out = pytesseract.image_to_string(img_crop, lang="deu")#, config='--psm 6')   #config='--psm 6' is bad when Montag not on first line 
 # language option needs installation of file in usr/share/tessseract/4.00/tessdata
 # --psm 6 is argument/option for tesseract to sort tables differently (not always needed, but seems to do nothing bad if not needed)
 
@@ -134,11 +137,12 @@ out2 = pytesseract.image_to_string(img_crop2, lang='deu',config='--psm 6')
 #print(out2)
 
 MBurger = re.sub(" +", " ", re.search('Monatsburger:((?s).*)Wochenburger', out2).group(1).replace("\n", " ").replace(" , ",", ").strip())
-WBurger = re.sub(" +", " ", re.search('Wochenburger:((?s).*)Wochenaktion', out2).group(1).replace("\n", " ").replace(" , ",", ").strip())
+WBurger = re.sub(" +", " ", re.search('Wochenburger:((?s).*)0', out2).group(1).replace("\n", " ").replace(" , ",", ").strip())
+#WBurger = re.sub(" +", " ", re.search('Wochenburger:((?s).*)Wochenaktion', out2).group(1).replace("\n", " ").replace(" , ",", ").strip())
 #WBurger = re.sub(" +", " ", re.search('\):((?s).*)Wochenaktion', out2).group(1).replace("\n", " ").replace(" , ",", ").strip())
-WAktion  = re.sub(" +", " ", re.search('Wochenaktion:((?s).*)', out2).group(1).replace("\n", " ").replace(" , ",", ").strip())  
+#WAktion  = re.sub(" +", " ", re.search('Wochenaktion:((?s).*)', out2).group(1).replace("\n", " ").replace(" , ",", ").strip())  
 #WAktion often changes actual name --> check if strings need to be adjusted for consistency
-
+WAktion = "diese Woche keine Wochenaktion, aber alle Burger gibt es scheinbar auch vegetarisch"
 daylist = [Mon,Die,Mit,Don,Fre]
 NeunB = np.ndarray((5,4),dtype=object)
 
@@ -151,7 +155,7 @@ for ind in range(0,5):		#add daily menu and specials which are available every d
 ######### MENSA = locid 42    ##############################################################
 mensa_file = "mensa_menu_week"+weeknumber+".pdf"
 try:
-	urllib.request.urlretrieve("http://menu.mensen.at//index/menu-pdf/locid/42?woy="+weeknumber+"&year=2018",mensa_file)
+	urllib.request.urlretrieve("http://menu.mensen.at//index/menu-pdf/locid/42?woy="+weeknumber+"&year=2019",mensa_file)
 except:
 	mensa_file = "mensa_menu_week48.pdf"	
 	print(colored("Mensa Menü nicht verfügbar, eingetragenes Menü vermutlich falsch",'red'))
@@ -162,23 +166,24 @@ Men = np.ndarray((5,3),dtype=object)
 
 for jnd in range(0,5):
 	#only if menu pdf has 2 pages:
-	#if jnd != 4:
-	#	for i in range(0,3):
-	#		Men[jnd][i] = re.sub('(€ ?\d+\,\d{1,2})', "", df[0]['data'][jnd+2][i+1]['text'].replace("\r", " "))
-	#else:
-	#	for i in range(0,3):
-	#		Men[jnd][i] = re.sub('(€ ?\d+\,\d{1,2})', "", df[2]['data'][1][i+1]['text'].replace("\r", ", "))
-	
-	for i in range(0,3):
-
+	if jnd != 4:
+		for i in range(0,3):
 			Men[jnd][i] = re.sub('(€ ?\d+\,\d{1,2})', "", df[0]['data'][jnd+2][i+1]['text'].replace("\r", " "))
-
+	else:
+		for i in range(0,3):
+			Men[jnd][i] = re.sub('(€ ?\d+\,\d{1,2})', "", df[2]['data'][1][i+1]['text'].replace("\r", ", "))
+	
+	#single page:
+	#for i in range(0,3):
+	#
+	#		Men[jnd][i] = re.sub('(€ ?\d+\,\d{1,2})', "", df[0]['data'][jnd+2][i+1]['text'].replace("\r", " "))
+	#TODO auto check wheter two or one page pdf
 #regex used to remove prices and for formatting of the strings
 
 ######################### TECH = locid 55 ####################################################
 tech_file = "tech_menu_week"+weeknumber+".pdf"
 try:
-	urllib.request.urlretrieve("http://menu.mensen.at//index/menu-pdf/locid/55?woy="+weeknumber+"&year=2018",tech_file)
+	urllib.request.urlretrieve("http://menu.mensen.at//index/menu-pdf/locid/55?woy="+weeknumber+"&year=2019",tech_file)
 except: 
 	tech_file = "tech_menu_week48.pdf"	
 	print(colored("TechCafe Menü nicht verfügbar, eingetragenes Menü vermutlich falsch",'red'))
