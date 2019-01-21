@@ -98,7 +98,8 @@ try:
 	#http://neunbe.at/pictures/49---111MENUE111--.jpg
 	#urllib.request.urlretrieve('http://neunbe.at/pictures/2018-KW-'+weeknumber+'.jpg', neunB_menu_file)	
 	#urllib.request.urlretrieve("http://neunbe.at/pictures/1111-9b-KW-"+weeknumber+"-2018.jpg", neunB_menu_file) 
-	urllib.request.urlretrieve("http://neunbe.at/pictures/9b---menue-0"+weeknumber+"-2019.jpg", neunB_menu_file) 
+	urllib.request.urlretrieve("http://neunbe.at/pictures/9b-menue-kw"+weeknumber+".jpg", neunB_menu_file) 
+	#http://neunbe.at/pictures/9b-menue-kw4.jpg
 	#http://neunbe.at/pictures/9b---menue-03-2019.jpg
 	#http://neunbe.at/pictures/9b---menue-02-2019.jpg
 	# often name changes so check before relying on information generated from this
@@ -113,11 +114,11 @@ except:
 	print(colored("9b Menǘ nicht verfügbar, eingetragenes Menü vermutlich falsch",'red'))
 
 img = Image.open(neunB_menu_file)
-area = (550,330,1225,900)   #these change from week to week unfortunatley, so they have to be adjusted manually every week
+area = (550,330,1225,875)   #these change from week to week unfortunatley, so they have to be adjusted manually every week
 img_crop = img.crop(area)
 #img_crop.show()	# shows the image from which text is extracted, has to show monday to friday with menu but nothing else
 
-area2 = (550,900,1275,1225)  #these change from week to week unfortunatley, so they have to be adjusted manually every week
+area2 = (550,875,1275,1200)  #these change from week to week unfortunatley, so they have to be adjusted manually every week
 img_crop2 = img.crop(area2)
 #img_crop2.show() 	# shows the image from which text is extracted, has to show specials but not the menu or other stuff
 
@@ -165,19 +166,20 @@ df = tabula.read_pdf(mensa_file, pages="all", lattice=True, guess=True, mulitple
 Men = np.ndarray((5,3),dtype=object)
 
 for jnd in range(0,5):
+	try:
 	#only if menu pdf has 2 pages:
-	if jnd != 4:
+		if jnd != 4:
+			for i in range(0,3):
+				Men[jnd][i] = re.sub('(€ ?\d+\,\d{1,2})', "", df[0]['data'][jnd+2][i+1]['text'].replace("\r", " "))
+		else:
+			for i in range(0,3):
+				Men[jnd][i] = re.sub('(€ ?\d+\,\d{1,2})', "", df[2]['data'][1][i+1]['text'].replace("\r", ", "))
+	
+	except:
+	#single page:
 		for i in range(0,3):
 			Men[jnd][i] = re.sub('(€ ?\d+\,\d{1,2})', "", df[0]['data'][jnd+2][i+1]['text'].replace("\r", " "))
-	else:
-		for i in range(0,3):
-			Men[jnd][i] = re.sub('(€ ?\d+\,\d{1,2})', "", df[2]['data'][1][i+1]['text'].replace("\r", ", "))
-	
-	#single page:
-	#for i in range(0,3):
-	#
-	#		Men[jnd][i] = re.sub('(€ ?\d+\,\d{1,2})', "", df[0]['data'][jnd+2][i+1]['text'].replace("\r", " "))
-	#TODO auto check wheter two or one page pdf
+
 #regex used to remove prices and for formatting of the strings
 
 ######################### TECH = locid 55 ####################################################
