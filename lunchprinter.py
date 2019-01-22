@@ -102,7 +102,7 @@ browser = RoboBrowser(history=True)
 browser.open(url_9b)
 request = browser.session.get(url_9b, stream=True)
 corr_url = re.search("2019\" src=\"../pictures/((?s).*\">)", str(request.content))[0].split("<br>")[0].split("/")[2].split(".jpg\">")[0]
-print(corr_url)
+#print(corr_url)
 ####
 
 try: 
@@ -111,6 +111,7 @@ try:
 	#urllib.request.urlretrieve("http://neunbe.at/pictures/9b-menue-kw"+weeknumber+".jpg", neunB_menu_file) 
 	urllib.request.urlretrieve("http://neunbe.at/pictures/"+corr_url+".jpg", neunB_menu_file)	
 	std_area = False	
+
 # should specify on which exception except should act (for all excepts in the script)
 except:
 	neunB_menu_file = "neunB_menu_week47.jpg"    # use a template menu from week 47 so the rest at least works
