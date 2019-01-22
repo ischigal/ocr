@@ -1,15 +1,16 @@
 try:
     from PIL import Image
 except ImportError:
-    import Image		# Imagick image viewer and stuff, also needed for screenshots
+    import Image			# Imagick image viewer and stuff, also needed for screenshots
 
-import urllib.request		# for reading URLs
-import pytesseract      	# it is important to install tesseract 4.0 which is not trivial for Ubuntu < 18.04 as default would there 					be version 3. One also hast to install libtesseract-dev from terminal and of course pytesseract via pip
-import re			# regual expressions tool for python
-import datetime			# for current week number and week day
-import tabula			# to read pdfs, important to install tabula-py and not tabula via pip
-import numpy as np		# for array operations
-from termcolor import colored 	# for colored terminal output
+import urllib.request			# for reading URLs
+import pytesseract      		# it is important to install tesseract 4.0 which is not trivial for Ubuntu < 18.04 as default 						would there be version 3. One also has to install libtesseract-dev from terminal and of 					course pytesseract via pip
+import re				# regual expressions tool for python
+import datetime				# for current week number and week day
+import tabula				# to read pdfs, important to install tabula-py and not tabula via pip
+import numpy as np			# for array operations
+from termcolor import colored 		# for colored terminal output
+from robobrowser import RoboBrowser 	# for automatic browsing of 9b website 
 
 ###################################################################################################
 
@@ -21,6 +22,9 @@ if datetime.date.today().weekday() < 5:
 	weeknumber = str(datetime.date.today().isocalendar()[1])  #needed as string for concatenation
 else:
 	weeknumber = str(datetime.date.today().isocalendar()[1]+1)
+
+#set year:
+year = str(datetime.date.today().year)
 
 ###################################################################################################
 
@@ -92,35 +96,40 @@ def lunchprinter(NeunBE, Mensa, Tech, wholeweek=False, tomorrow=False):
 ########## 9b - the people who can't name files in a coherent way ###############################
 neunB_menu_file = "neunB_menu_week"+weeknumber+".jpg"
 
+#### EXPERIMENTAL:
+url_9b = 'http://neunbe.at/menue.html'
+browser = RoboBrowser(history=True)
+browser.open(url_9b)
+request = browser.session.get(url_9b, stream=True)
+corr_url = re.search("2019\" src=\"../pictures/((?s).*\">)", str(request.content))[0].split("<br>")[0].split("/")[2].split(".jpg\">")[0]
+print(corr_url)
+####
+
 try: 
-	# current format: http://neunbe.at/pictures/KW-50-2018.jpg
-	#urllib.request.urlretrieve('http://neunbe.at/pictures/'+weeknumber+'---111MENUE111--.jpg', neunB_menu_file)
-	#http://neunbe.at/pictures/49---111MENUE111--.jpg
-	#urllib.request.urlretrieve('http://neunbe.at/pictures/2018-KW-'+weeknumber+'.jpg', neunB_menu_file)	
-	#urllib.request.urlretrieve("http://neunbe.at/pictures/1111-9b-KW-"+weeknumber+"-2018.jpg", neunB_menu_file) 
-	urllib.request.urlretrieve("http://neunbe.at/pictures/9b-menue-kw"+weeknumber+".jpg", neunB_menu_file) 
-	#http://neunbe.at/pictures/9b-menue-kw4.jpg
-	#http://neunbe.at/pictures/9b---menue-03-2019.jpg
-	#http://neunbe.at/pictures/9b---menue-02-2019.jpg
-	# often name changes so check before relying on information generated from this
-	# new (3rd) URL style .../KW47-2018-Menue.jpg
-	# http://neunbe.at/pictures/2018-KW-48.jpg    --> 4th style in 4 weeks
-	#http://neunbe.at/pictures/1111-9b-KW-51-2018.jpg
+	# current format: http://neunbe.at/pictures/9b-menue-kw4.jpg
+	# deprecated:
+	#urllib.request.urlretrieve("http://neunbe.at/pictures/9b-menue-kw"+weeknumber+".jpg", neunB_menu_file) 
+	urllib.request.urlretrieve("http://neunbe.at/pictures/"+corr_url+".jpg", neunB_menu_file)	
+	std_area = False	
+# should specify on which exception except should act (for all excepts in the script)
 except:
 	neunB_menu_file = "neunB_menu_week47.jpg"    # use a template menu from week 47 so the rest at least works
 	# needs: 
-	# area = (520,250,1150,650)   
-	# area2 = (520,650,1150,1200) 
+	area = (520,250,1150,650)   
+	area2 = (520,650,1150,1200) 
+	std_area = True	
 	print(colored("9b Menǘ nicht verfügbar, eingetragenes Menü vermutlich falsch",'red'))
 
 img = Image.open(neunB_menu_file)
-area = (550,330,1225,875)   #these change from week to week unfortunatley, so they have to be adjusted manually every week
+if not std_area:
+	area = (550,330,1225,875)   #these change from week to week unfortunatley, so they have to be adjusted manually every week
 img_crop = img.crop(area)
-#img_crop.show()	# shows the image from which text is extracted, has to show monday to friday with menu but nothing else
+#img_crop.show()	
 
-area2 = (550,875,1275,1200)  #these change from week to week unfortunatley, so they have to be adjusted manually every week
+if not std_area:
+	area2 = (550,875,1275,1200)  #these change from week to week unfortunatley, so they have to be adjusted manually every week
 img_crop2 = img.crop(area2)
-#img_crop2.show() 	# shows the image from which text is extracted, has to show specials but not the menu or other stuff
+#img_crop2.show() 	
 
 out = pytesseract.image_to_string(img_crop, lang="deu")#, config='--psm 6')   #config='--psm 6' is bad when Montag not on first line 
 # language option needs installation of file in usr/share/tessseract/4.00/tessdata
@@ -137,13 +146,16 @@ Fre = re.sub(" +", " ", re.search('Freitag((?s).*)', out).group(1).replace("\n",
 out2 = pytesseract.image_to_string(img_crop2, lang='deu',config='--psm 6')
 #print(out2)
 
+# need to add support for 9b not offering Wochenaktion
+
 MBurger = re.sub(" +", " ", re.search('Monatsburger:((?s).*)Wochenburger', out2).group(1).replace("\n", " ").replace(" , ",", ").strip())
 WBurger = re.sub(" +", " ", re.search('Wochenburger:((?s).*)0', out2).group(1).replace("\n", " ").replace(" , ",", ").strip())
 #WBurger = re.sub(" +", " ", re.search('Wochenburger:((?s).*)Wochenaktion', out2).group(1).replace("\n", " ").replace(" , ",", ").strip())
-#WBurger = re.sub(" +", " ", re.search('\):((?s).*)Wochenaktion', out2).group(1).replace("\n", " ").replace(" , ",", ").strip())
+
 #WAktion  = re.sub(" +", " ", re.search('Wochenaktion:((?s).*)', out2).group(1).replace("\n", " ").replace(" , ",", ").strip())  
 #WAktion often changes actual name --> check if strings need to be adjusted for consistency
 WAktion = "diese Woche keine Wochenaktion, aber alle Burger gibt es scheinbar auch vegetarisch"
+
 daylist = [Mon,Die,Mit,Don,Fre]
 NeunB = np.ndarray((5,4),dtype=object)
 
@@ -156,10 +168,11 @@ for ind in range(0,5):		#add daily menu and specials which are available every d
 ######### MENSA = locid 42    ##############################################################
 mensa_file = "mensa_menu_week"+weeknumber+".pdf"
 try:
-	urllib.request.urlretrieve("http://menu.mensen.at//index/menu-pdf/locid/42?woy="+weeknumber+"&year=2019",mensa_file)
+	urllib.request.urlretrieve("http://menu.mensen.at//index/menu-pdf/locid/42?woy="+weeknumber+"&year="+year,mensa_file)
 except:
 	mensa_file = "mensa_menu_week48.pdf"	
 	print(colored("Mensa Menü nicht verfügbar, eingetragenes Menü vermutlich falsch",'red'))
+
 # Read pdf into json style DataFrame
 df = tabula.read_pdf(mensa_file, pages="all", lattice=True, guess=True, mulitple_tables=True ,output_format="json")
 
@@ -185,7 +198,7 @@ for jnd in range(0,5):
 ######################### TECH = locid 55 ####################################################
 tech_file = "tech_menu_week"+weeknumber+".pdf"
 try:
-	urllib.request.urlretrieve("http://menu.mensen.at//index/menu-pdf/locid/55?woy="+weeknumber+"&year=2019",tech_file)
+	urllib.request.urlretrieve("http://menu.mensen.at//index/menu-pdf/locid/55?woy="+weeknumber+"&year="+year,tech_file)
 except: 
 	tech_file = "tech_menu_week48.pdf"	
 	print(colored("TechCafe Menü nicht verfügbar, eingetragenes Menü vermutlich falsch",'red'))
