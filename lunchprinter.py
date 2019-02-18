@@ -123,12 +123,12 @@ except:
 
 img = Image.open(neunB_menu_file)
 if not std_area:
-	area = (550,330,1225,875)   #these change from week to week unfortunatley, so they have to be adjusted manually every week
+	area = (575,275,1275,850)   #these change from week to week unfortunatley, so they have to be adjusted manually every week
 img_crop = img.crop(area)
 #img_crop.show()	
 
 if not std_area:
-	area2 = (550,875,1275,1200)  #these change from week to week unfortunatley, so they have to be adjusted manually every week
+	area2 = (550,825,1275,1250)  #these change from week to week unfortunatley, so they have to be adjusted manually every week
 img_crop2 = img.crop(area2)
 #img_crop2.show() 	
 
