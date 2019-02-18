@@ -15,156 +15,168 @@ from robobrowser import RoboBrowser 	# for automatic browsing of 9b website
 ###################################################################################################
 
 #tesseract location (of executable/command!); 
-pytesseract.pytesseract.tesseract_cmd = r'/usr/bin/tesseract'
+pytesseract.pytesseract.tesseract_cmd = r'/usr/bin/tesseract' 
 
 #set week in year
-if datetime.date.today().weekday() < 5:
-	weeknumber = str(datetime.date.today().isocalendar()[1])  #needed as string for concatenation
-else:
-	weeknumber = str(datetime.date.today().isocalendar()[1]+1)
-
+weeknumber = datetime.date.today().isocalendar()[1]
+if not datetime.date.today().weekday() < 5:	# for weekend we want next weeks menu
+	weeknumber +=1  
+weeknumber = str(weeknumber)  # for string concatenation later on
 #set year:
 year = str(datetime.date.today().year)
 
 ###################################################################################################
 
-def lunchprinter(NeunBE, Mensa, Tech, wholeweek=False, tomorrow=False):
+def lunchprinter(NeunBE, Mensa, Tech, Flags):
 	
 	mensa_names = ['Menü Classic: \t', 'Vegetarisch: \t', 'Tagesteller: \t']
 	tech_names = ['Tagesteller: \t', 'Vegetarisch: \t', 'Pasta: \t\t']
-	neunbe_names = ['Tagesmenü: \t', 'Monatsburger: \t', 'Wochenburger: \t', 'Wochenaktion: \t']
+	neunbe_names = ['Tagesmenü: \t', 'Monatsburger: \t', 'Wochenburger: \t']
 	days = ['Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag','Sonntag'] 
 
-	if wholeweek == True:
-		mensa = Mensa
-		tech = Tech
-		neunbe = NeunBE
+	outfile_today = open("today_out.txt","w")
+	outfile_tomorrow = open("tomorrow_out.txt","w")
+	outfile_week = open("week_out.txt","w")
+	for i in range(len(flags)):		
+		outfile_today.write(flags[i])
+		outfile_tomorrow.write(flags[i])
+		outfile_week.write(flags[i])
 
-		for j in range(0,len(days)-2):
-			print('--------------------------- '+days[j]+' ---------------------------', "\n")
-			print("------------ Mensa ------------", "\n")
-			for i in range(0,len(mensa[j])):
-				print(mensa_names[i],mensa[j][i],"\n")
-			print("------------ Tech ------------", "\n")
-			for i in range(0,len(tech[j])):
-				print(tech_names[i],tech[j][i],"\n")
-			print("------------ 9b ------------", "\n")
-			for i in range(0,len(neunbe[j])):
-				print(neunbe_names[i],neunbe[j][i],"\n")
-	else:	
-
-		if tomorrow == False:
-			weekday = datetime.date.today().weekday()
+	weekday = datetime.date.today().weekday()
+	day = days[weekday]
 		
-		else:
-			weekday = (datetime.date.today()+datetime.timedelta(days=1)).weekday()	
+	if weekday >= 5:
+		mensa = Mensa[0]
+		tech = Tech[0]
+		neunbe = NeunBE[0]
+		outfile_today.write("nächster Montag:\n")
+		outfile_today.write("\nMensa:\n")
+		for i in range(0,len(mensa)):
+			outfile_today.write("\n"+mensa_names[i]+"\n\n"+mensa[i]+"\n")
+		outfile_today.write("\nTechCafe:\n")
+		for i in range(0,len(tech)):
+			outfile_today.write("\n"+tech_names[i]+"\n\n"+tech[i]+"\n")
+		outfile_today.write("\n9b:\n")
+		for i in range(0,len(neunbe)):
+			outfile_today.write("\n"+neunbe_names[i]+"\n\n"+neunbe[i]+"\n")
+			
+	else:
+		mensa = Mensa[weekday]
+		tech = Tech[weekday]
+		neunbe = NeunBE[weekday]	
+	
+		outfile_today.write(day+":\n")
+		outfile_today.write("\nMensa:\n")
+		for i in range(0,len(mensa)):
+			outfile_today.write("\n"+mensa_names[i]+"\n\n"+mensa[i]+"\n")
+		outfile_today.write("\nTechCafe:\n")
+		for i in range(0,len(tech)):
+			outfile_today.write("\n"+tech_names[i]+"\n\n"+tech[i]+"\n")
+		outfile_today.write("\n9b:\n")
+		for i in range(0,len(neunbe)):
+			outfile_today.write("\n"+neunbe_names[i]+"\n\n"+neunbe[i]+"\n")
+	
+	outfile_today.close()		
+	weekday = (datetime.date.today()+datetime.timedelta(days=1)).weekday()	
+	day = days[weekday]
 		
-		day = days[weekday]
+	if weekday >= 5:
+		mensa = Mensa[0]
+		tech = Tech[0]
+		neunbe = NeunBE[0]
+		outfile_tomorrow.write("nächster Montag:\n")
+		outfile_tomorrow.write("\nMensa:\n")
+		for i in range(0,len(mensa)):
+			outfile_tomorrow.write("\n"+mensa_names[i]+"\n\n"+mensa[i]+"\n")
+		outfile_tomorrow.write("\nTechCafe:\n")
+		for i in range(0,len(tech)):
+			outfile_tomorrow.write("\n"+tech_names[i]+"\n\n"+tech[i]+"\n")
+		outfile_tomorrow.write("\n9b:\n")
+		for i in range(0,len(neunbe)):
+			outfile_tomorrow.write("\n"+neunbe_names[i]+"\n\n"+neunbe[i]+"\n")
 		
-		if weekday >= 5:
-			mensa = Mensa[0]
-			tech = Tech[0]
-			neunbe = NeunBE[0]
-
-			print("--------------------------- nächster Montag ---------------------------")
-			print("------------ Mensa ------------", "\n")
-			for i in range(0,len(mensa)):
-				print(mensa_names[i],mensa[i],"\n")
-			print("------------ Tech ------------", "\n")
-			for i in range(0,len(tech)):
-				print(tech_names[i],tech[i],"\n")
-			print("------------ 9b ------------", "\n")
-			for i in range(0,len(neunbe)):
-				print(neunbe_names[i],neunbe[i],"\n")
-			
-		else:
-			mensa = Mensa[weekday]
-			tech = Tech[weekday]
-			neunbe = NeunBE[weekday]	
-			
-			print("--------------------------- "+day+" ---------------------------", "\n")
-			print("------------ Mensa ------------", "\n")
-			for i in range(0,len(mensa)):
-				print(mensa_names[i],mensa[i],"\n")
-			print("------------ Tech ------------", "\n")
-			for i in range(0,len(tech)):
-				print(tech_names[i],tech[i],"\n")
-			print("------------ 9b ------------", "\n")
-			for i in range(0,len(neunbe)):
-				print(neunbe_names[i],neunbe[i],"\n")
-			
+	else:
+		mensa = Mensa[weekday]
+		tech = Tech[weekday]
+		neunbe = NeunBE[weekday]	
+		
+		outfile_tomorrow.write(day+":\n")
+		outfile_tomorrow.write("\nMensa:\n")
+		for i in range(0,len(mensa)):
+			outfile_tomorrow.write("\n"+mensa_names[i]+"\n\n"+mensa[i]+"\n")
+		outfile_tomorrow.write("\nTechCafe:\n")
+		for i in range(0,len(tech)):
+			outfile_tomorrow.write("\n"+tech_names[i]+"\n\n"+tech[i]+"\n")
+		outfile_tomorrow.write("\n9b:\n")
+		for i in range(0,len(neunbe)):
+			outfile_tomorrow.write("\n"+neunbe_names[i]+"\n\n"+neunbe[i]+"\n")
+	outfile_tomorrow.close()
+	
+	mensa = Mensa
+	tech = Tech
+	neunbe = NeunBE
+	for j in range(0,len(days)-2):
+		outfile_week.write(days[j]+':\n')
+		outfile_week.write("\nMensa:\n")
+		for i in range(0,len(mensa[j])):
+			outfile_week.write("\n"+mensa_names[i]+"\n\n"+mensa[j][i]+"\n")
+		outfile_week.write("\nTechCafe:\n")
+		for i in range(0,len(tech[j])):
+			outfile_week.write("\n"+tech_names[i]+"\n\n"+tech[j][i]+"\n")
+		outfile_week.write("\n9b:\n")
+		for i in range(0,len(neunbe[j])):
+			outfile_week.write("\n"+neunbe_names[i]+"\n\n"+neunbe[j][i]+"\n")
+	outfile_week.close()	
+	
+		
 ########## 9b - the people who can't name files in a coherent way ###############################
+flags=[]
+
 neunB_menu_file = "neunB_menu_week"+weeknumber+".jpg"
 
-#### EXPERIMENTAL:
 url_9b = 'http://neunbe.at/menue.html'
 browser = RoboBrowser(history=True)
 browser.open(url_9b)
 request = browser.session.get(url_9b, stream=True)
 corr_url = re.search("2019\" src=\"../pictures/((?s).*\">)", str(request.content))[0].split("<br>")[0].split("/")[2].split(".jpg\">")[0]
-#print(corr_url)
-####
 
 try: 
-	# current format: http://neunbe.at/pictures/9b-menue-kw4.jpg
-	# deprecated:
-	#urllib.request.urlretrieve("http://neunbe.at/pictures/9b-menue-kw"+weeknumber+".jpg", neunB_menu_file) 
 	urllib.request.urlretrieve("http://neunbe.at/pictures/"+corr_url+".jpg", neunB_menu_file)	
-	std_area = False	
 
 # should specify on which exception except should act (for all excepts in the script)
 except:
-	neunB_menu_file = "neunB_menu_week47.jpg"    # use a template menu from week 47 so the rest at least works
-	# needs: 
-	area = (520,250,1150,650)   
-	area2 = (520,650,1150,1200) 
-	std_area = True	
-	print(colored("9b Menǘ nicht verfügbar, eingetragenes Menü vermutlich falsch",'red'))
+	neunB_menu_file = "neunB_menu_week8.jpg"    # use a template menu from week 8/2019 so the rest at least works
+	flags.append("9b Menǘ nicht verfügbar, eingetragenes Menü vermutlich falsch")
 
 img = Image.open(neunB_menu_file)
-if not std_area:
-	area = (575,275,1275,850)   #these change from week to week unfortunatley, so they have to be adjusted manually every week
-img_crop = img.crop(area)
-#img_crop.show()	
+area = (550,300,1300,1200)
+img = img.crop(area)
+#img.show()
 
-if not std_area:
-	area2 = (550,825,1275,1250)  #these change from week to week unfortunatley, so they have to be adjusted manually every week
-img_crop2 = img.crop(area2)
-#img_crop2.show() 	
-
-out = pytesseract.image_to_string(img_crop, lang="deu")#, config='--psm 6')   #config='--psm 6' is bad when Montag not on first line 
 # language option needs installation of file in usr/share/tessseract/4.00/tessdata
-# --psm 6 is argument/option for tesseract to sort tables differently (not always needed, but seems to do nothing bad if not needed)
-
+# --psm 6 is page separation mode option of tesseract, 6 uses image es single block of text, 3 is automatic/default
+# psm 3 is better when there are empty lines in the day column before the actual day e.g. \nMontag 
+out = pytesseract.image_to_string(img, lang="deu", config='--psm 3')
 #print(out)
 
 Mon = re.sub(" +", " ", re.search('Montag((?s).*)Dienstag', out).group(1).replace("\n"," ").replace(" , ",", ").strip())
 Die = re.sub(" +", " ", re.search('Dienstag((?s).*)Mittwoch', out).group(1).replace("\n"," ").replace(" , ",", ").strip())
 Mit = re.sub(" +", " ", re.search('Mittwoch((?s).*)Donnerstag', out).group(1).replace("\n"," ").replace(" , ",", ").strip())
 Don = re.sub(" +", " ", re.search('Donnerstag((?s).*)Freitag', out).group(1).replace("\n"," ").replace(" , ",", ").strip())
-Fre = re.sub(" +", " ", re.search('Freitag((?s).*)', out).group(1).replace("\n"," ").replace(" , ",", ").strip())
+Fre = re.sub(" +", " ", re.search('Freitag((?s).*)Monatsburger', out).group(1).replace("\n"," ").replace(" , ",", ").strip())
 
-out2 = pytesseract.image_to_string(img_crop2, lang='deu',config='--psm 6')
-#print(out2)
+# TODO: add price to output?
 
-# need to add support for 9b not offering Wochenaktion
-
-MBurger = re.sub(" +", " ", re.search('Monatsburger:((?s).*)Wochenburger', out2).group(1).replace("\n", " ").replace(" , ",", ").strip())
-WBurger = re.sub(" +", " ", re.search('Wochenburger:((?s).*)0', out2).group(1).replace("\n", " ").replace(" , ",", ").strip())
-#WBurger = re.sub(" +", " ", re.search('Wochenburger:((?s).*)Wochenaktion', out2).group(1).replace("\n", " ").replace(" , ",", ").strip())
-
-#WAktion  = re.sub(" +", " ", re.search('Wochenaktion:((?s).*)', out2).group(1).replace("\n", " ").replace(" , ",", ").strip())  
-#WAktion often changes actual name --> check if strings need to be adjusted for consistency
-WAktion = "diese Woche keine Wochenaktion, aber alle Burger gibt es scheinbar auch vegetarisch"
+MBurger = re.sub(" +", " ", re.search('Monatsburger:((?s).*)\s\u20AC((?s).*)Wochenburger', out).group(1).replace("\n", " ").replace(" , ",", ").strip())
+WBurger = re.sub(" +", " ", re.search('Wochenburger:((?s).*)\s\u20AC', out).group(1).replace("\n", " ").replace(" , ",", ").strip())
 
 daylist = [Mon,Die,Mit,Don,Fre]
-NeunB = np.ndarray((5,4),dtype=object)
+NeunB = np.ndarray((5,3),dtype=object)
 
-for ind in range(0,5):		#add daily menu and specials which are available every day
+for ind in range(len(daylist)):		#add daily menu and specials which are available every day
 	NeunB[ind][0] = daylist[ind] 
 	NeunB[ind][1] = MBurger
 	NeunB[ind][2] = WBurger
-	NeunB[ind][3] = WAktion
 
 ######### MENSA = locid 42    ##############################################################
 mensa_file = "mensa_menu_week"+weeknumber+".pdf"
@@ -172,7 +184,7 @@ try:
 	urllib.request.urlretrieve("http://menu.mensen.at//index/menu-pdf/locid/42?woy="+weeknumber+"&year="+year,mensa_file)
 except:
 	mensa_file = "mensa_menu_week48.pdf"	
-	print(colored("Mensa Menü nicht verfügbar, eingetragenes Menü vermutlich falsch",'red'))
+	flags.append("Mensa Menü nicht verfügbar, eingetragenes Menü vermutlich falsch")
 
 # Read pdf into json style DataFrame
 df = tabula.read_pdf(mensa_file, pages="all", lattice=True, guess=True, mulitple_tables=True ,output_format="json")
@@ -194,15 +206,14 @@ for jnd in range(0,5):
 		for i in range(0,3):
 			Men[jnd][i] = re.sub('(€ ?\d+\,\d{1,2})', "", df[0]['data'][jnd+2][i+1]['text'].replace("\r", " "))
 
-#regex used to remove prices and for formatting of the strings
-
 ######################### TECH = locid 55 ####################################################
 tech_file = "tech_menu_week"+weeknumber+".pdf"
 try:
 	urllib.request.urlretrieve("http://menu.mensen.at//index/menu-pdf/locid/55?woy="+weeknumber+"&year="+year,tech_file)
 except: 
 	tech_file = "tech_menu_week48.pdf"	
-	print(colored("TechCafe Menü nicht verfügbar, eingetragenes Menü vermutlich falsch",'red'))
+	flags.append("TechCafe Menü nicht verfügbar, eingetragenes Menü vermutlich falsch")
+
 # similar as for mensa
 df2 = tabula.read_pdf(tech_file, pages="all", lattice=True, guess=True, mulitple_tables=True ,output_format="json")
 
@@ -215,4 +226,6 @@ for knd in range(0,5):
 
 ###################################################################################################
 
-lunchprinter(NeunB,Men,Tec,wholeweek = False, tomorrow = False) #wholeweek and tomorrow are optional and False by default 	
+lunchprinter(NeunB,Men,Tec,flags)
+
+#TODO delete files after reading?!
