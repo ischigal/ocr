@@ -7,7 +7,7 @@ import threading
 
 def refreshmenue():
 	call(["python","lunchprinter.py"])
-	threading.Timer(3600, refreshmenue).start()
+	threading.Timer(600, refreshmenue).start()
 
 refreshmenue()
 
@@ -23,24 +23,31 @@ def start(update, context):
 	"""Send a message when the command /start is issued."""
 	update.message.reply_text('Hi!')
 
-
 def help(update, context):
 	"""Send a message when the command /help is issued."""
 	update.message.reply_text('Use:\n /today for today\'s lunch \n /tomorrow for tomorrow\'s lunch \n /week for the entire week menue')
 
 def today(update, context):
 
-	file_today = open("today_out.txt","r")
-	menue_today = file_today.read()
-	file_today.close()
-	update.message.reply_text(menue_today)
+	#file_today = open("today_out.txt","r")
+	#menue_today = file_today.read()
+	#file_today.close()
+	#update.message.reply_text(menue_today, parse_mode=telegram.ParseMode.MARKDOWN)
+	pictoday = open('today_out.png', 'rb')
+	update.message.reply_photo(photo=pictoday)
+	pictoday.close()
 
 def tomorrow(update, context):
 
-	file_tomorrow = open("tomorrow_out.txt","r")
-	menue_tomorrow = file_tomorrow.read()
-	file_tomorrow.close()
-	update.message.reply_text(menue_tomorrow)
+	#file_tomorrow = open("tomorrow_out.txt","r")
+	#menue_tomorrow = file_tomorrow.read()
+	#file_tomorrow.close()
+	#update.message.reply_text(menue_tomorrow, parse_mode=telegram.ParseMode.MARKDOWN)
+	pictomorrow = open('tomorrow_out.png', 'rb')
+	update.message.reply_photo(photo=pictomorrow)
+	pictomorrow.close()
+
+
 
 def week(update, context):
 	
@@ -48,16 +55,18 @@ def week(update, context):
 	menue_week = file_week.read()
 	file_week.close()
 	if len(menue_week) > 4000:
-		update.message.reply_text(menue_week[:len(menue_week)//2])
-		update.message.reply_text(menue_week[len(menue_week)//2:])
+		update.message.reply_text(menue_week[:len(menue_week)//2],parse_mode=telegram.ParseMode.MARKDOWN)
+		update.message.reply_text(menue_week[len(menue_week)//2:],parse_mode=telegram.ParseMode.MARKDOWN)
 	else:
-		update.message.reply_text(menue_week)
+		update.message.reply_text(menue_week, parse_mode=telegram.ParseMode.MARKDOWN)
+	#picweek = open('week_out.png', 'rb')
+	#update.message.reply_photo(photo=picweek)
+	#picweek.close()
 
 
 def error(update, context):
 	"""Log Errors caused by Updates."""
 	logger.warning('Update "%s" caused error "%s"', update, context.error)
-
 
 def main():
 	"""Start the bot."""
