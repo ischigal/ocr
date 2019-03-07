@@ -85,9 +85,9 @@ def text_image(text_path, font_path=None):
 #######################################################################################################
 def lunchprinter(NeunBE, Mensa, Tech, Flags):
 	
-	mensa_names = ['Menü Classic: \t', 'Vegetarisch: \t', 'Tagesteller: \t']
-	tech_names = ['Tagesteller: \t', 'Vegetarisch: \t', 'Pasta: \t\t']
-	neunbe_names = ['Tagesmenü: \t', 'Monatsburger: \t', 'Wochenburger: \t']
+	mensa_names = ['_Menü Classic:_ \t', '_Vegetarisch:_ \t', '_Tagesteller:_ \t']
+	tech_names = ['_Tagesteller:_ \t', '_Vegetarisch:_ \t', '_Pasta:_ \t\t']
+	neunbe_names = ['_Tagesmenü:_ \t', '_Monatsburger:_ \t', '_Wochenburger:_ \t']
 	days = ['Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag','Sonntag'] 
 
 	outfile_today = open("today_out.txt","w")
@@ -105,32 +105,32 @@ def lunchprinter(NeunBE, Mensa, Tech, Flags):
 		mensa = Mensa[0]
 		tech = Tech[0]
 		neunbe = NeunBE[0]
-		outfile_today.write("nächster Montag:\n")
-		outfile_today.write("Mensa:\n")
+		outfile_today.write("*nächster Montag:* \n")
+		outfile_today.write("\n *Mensa:* \n")
 		for i in range(0,len(mensa)):
-			outfile_today.write(mensa_names[i]+"\n"+mensa[i]+"\n")
-		outfile_today.write("TechCafe:\n")
+			outfile_today.write(mensa_names[i]+"\n  "+mensa[i]+"\n")
+		outfile_today.write("\n *TechCafe:* \n")
 		for i in range(0,len(tech)):
-			outfile_today.write(tech_names[i]+"\n"+tech[i]+"\n")
-		outfile_today.write("9b:\n")
+			outfile_today.write(tech_names[i]+"\n  "+tech[i]+"\n")
+		outfile_today.write("\n *9b:* \n")
 		for i in range(0,len(neunbe)):
-			outfile_today.write(neunbe_names[i]+"\n"+neunbe[i]+"\n")
+			outfile_today.write(neunbe_names[i]+"\n  "+neunbe[i]+"\n")
 			
 	else:
 		mensa = Mensa[weekday]
 		tech = Tech[weekday]
 		neunbe = NeunBE[weekday]	
 	
-		outfile_today.write(day+":\n")
-		outfile_today.write("Mensa:\n")
+		outfile_today.write("*"+day+":* \n")
+		outfile_today.write("\n *Mensa:* \n")
 		for i in range(0,len(mensa)):
-			outfile_today.write(mensa_names[i]+"\n"+mensa[i]+"\n")
-		outfile_today.write("TechCafe:\n")
+			outfile_today.write(mensa_names[i]+"\n  "+mensa[i]+"\n")
+		outfile_today.write("\n *TechCafe:* \n")
 		for i in range(0,len(tech)):
-			outfile_today.write(tech_names[i]+"\n"+tech[i]+"\n")
-		outfile_today.write("9b:\n")
+			outfile_today.write(tech_names[i]+"\n  "+tech[i]+"\n")
+		outfile_today.write("\n *9b:* \n")
 		for i in range(0,len(neunbe)):
-			outfile_today.write(neunbe_names[i]+"\n"+neunbe[i]+"\n")
+			outfile_today.write(neunbe_names[i]+"\n  "+neunbe[i]+"\n")
 	
 	outfile_today.close()		
 	weekday = (datetime.date.today()+datetime.timedelta(days=1)).weekday()	
@@ -140,48 +140,48 @@ def lunchprinter(NeunBE, Mensa, Tech, Flags):
 		mensa = Mensa[0]
 		tech = Tech[0]
 		neunbe = NeunBE[0]
-		outfile_tomorrow.write("nächster Montag:\n")
-		outfile_tomorrow.write("Mensa:\n")
+		outfile_tomorrow.write("*nächster Montag:* \n")
+		outfile_tomorrow.write("\n *Mensa:* \n")
 		for i in range(0,len(mensa)):
-			outfile_tomorrow.write(mensa_names[i]+"\n"+mensa[i]+"\n")
-		outfile_tomorrow.write("TechCafe:\n")
+			outfile_tomorrow.write(mensa_names[i]+"\n  "+mensa[i]+"\n")
+		outfile_tomorrow.write("\n *TechCafe:* \n")
 		for i in range(0,len(tech)):
-			outfile_tomorrow.write(tech_names[i]+"\n"+tech[i]+"\n")
-		outfile_tomorrow.write("9b:\n")
+			outfile_tomorrow.write(tech_names[i]+"\n  "+tech[i]+"\n")
+		outfile_tomorrow.write("\n *9b:* \n")
 		for i in range(0,len(neunbe)):
-			outfile_tomorrow.write(neunbe_names[i]+"\n"+neunbe[i]+"\n")
+			outfile_tomorrow.write(neunbe_names[i]+"\n  "+neunbe[i]+"\n")
 		
 	else:
 		mensa = Mensa[weekday]
 		tech = Tech[weekday]
 		neunbe = NeunBE[weekday]	
 		
-		outfile_tomorrow.write(day+":\n")
-		outfile_tomorrow.write("Mensa:\n")
+		outfile_tomorrow.write("*"+day+":* \n")
+		outfile_tomorrow.write("\n *Mensa:* \n")
 		for i in range(0,len(mensa)):
-			outfile_tomorrow.write(mensa_names[i]+"\n"+mensa[i]+"\n")
-		outfile_tomorrow.write("TechCafe:\n")
+			outfile_tomorrow.write(mensa_names[i]+"\n  "+mensa[i]+"\n")
+		outfile_tomorrow.write("\n *TechCafe:* \n")
 		for i in range(0,len(tech)):
-			outfile_tomorrow.write(tech_names[i]+"\n"+tech[i]+"\n")
-		outfile_tomorrow.write("9b:\n")
+			outfile_tomorrow.write(tech_names[i]+"\n  "+tech[i]+"\n")
+		outfile_tomorrow.write("\n *9b:* \n")
 		for i in range(0,len(neunbe)):
-			outfile_tomorrow.write(neunbe_names[i]+"\n"+neunbe[i]+"\n")
+			outfile_tomorrow.write(neunbe_names[i]+"\n  "+neunbe[i]+"\n")
 	outfile_tomorrow.close()
 	
 	mensa = Mensa
 	tech = Tech
 	neunbe = NeunBE
 	for j in range(0,len(days)-2):
-		outfile_week.write(days[j]+':\n')
-		outfile_week.write("Mensa:\n")
+		outfile_week.write("*"+days[j]+':* \n')
+		outfile_week.write("\n *Mensa:* \n")
 		for i in range(0,len(mensa[j])):
-			outfile_week.write(mensa_names[i]+"\n"+mensa[j][i]+"\n")
-		outfile_week.write("TechCafe:\n")
+			outfile_week.write(mensa_names[i]+"\n  "+mensa[j][i]+"\n")
+		outfile_week.write("\n *TechCafe:* \n")
 		for i in range(0,len(tech[j])):
-			outfile_week.write(tech_names[i]+"\n"+tech[j][i]+"\n")
-		outfile_week.write("9b:\n")
+			outfile_week.write(tech_names[i]+"\n  "+tech[j][i]+"\n")
+		outfile_week.write("\n *9b:* \n")
 		for i in range(0,len(neunbe[j])):
-			outfile_week.write(neunbe_names[i]+"\n"+neunbe[j][i]+"\n")
+			outfile_week.write(neunbe_names[i]+"\n  "+neunbe[j][i]+"\n")
 	outfile_week.close()	
 
 	image_d = text_image('today_out.txt')
@@ -223,7 +223,7 @@ img = img.crop(area)
 # language option needs installation of file in usr/share/tessseract/4.00/tessdata
 # --psm 6 is page separation mode option of tesseract, 6 uses image es single block of text, 3 is automatic/default
 # psm 3 is better when there are empty lines in the day column before the actual day e.g. \nMontag 
-out = pytesseract.image_to_string(img, lang="deu", config='--psm 3')
+out = pytesseract.image_to_string(img, lang="deu", config='--psm 6')
 #print(out)
 
 Mon = re.sub(" +", " ", re.search('Montag((?s).*)Dienstag', out).group(1).replace("\n"," ").replace(" , ",", ").strip())

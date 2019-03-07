@@ -29,23 +29,23 @@ def help(update, context):
 
 def today(update, context):
 
-	#file_today = open("today_out.txt","r")
-	#menue_today = file_today.read()
-	#file_today.close()
-	#update.message.reply_text(menue_today, parse_mode=telegram.ParseMode.MARKDOWN)
-	pictoday = open('today_out.png', 'rb')
-	update.message.reply_photo(photo=pictoday)
-	pictoday.close()
+	file_today = open("today_out.txt","r")
+	menue_today = file_today.read()
+	file_today.close()
+	update.message.reply_text(menue_today, parse_mode=telegram.ParseMode.MARKDOWN)
+	#pictoday = open('today_out.png', 'rb')
+	#update.message.reply_photo(photo=pictoday)
+	#pictoday.close()
 
 def tomorrow(update, context):
 
-	#file_tomorrow = open("tomorrow_out.txt","r")
-	#menue_tomorrow = file_tomorrow.read()
-	#file_tomorrow.close()
-	#update.message.reply_text(menue_tomorrow, parse_mode=telegram.ParseMode.MARKDOWN)
-	pictomorrow = open('tomorrow_out.png', 'rb')
-	update.message.reply_photo(photo=pictomorrow)
-	pictomorrow.close()
+	file_tomorrow = open("tomorrow_out.txt","r")
+	menue_tomorrow = file_tomorrow.read()
+	file_tomorrow.close()
+	update.message.reply_text(menue_tomorrow, parse_mode=telegram.ParseMode.MARKDOWN)
+	#pictomorrow = open('tomorrow_out.png', 'rb')
+	#update.message.reply_photo(photo=pictomorrow)
+	#pictomorrow.close()
 
 
 
