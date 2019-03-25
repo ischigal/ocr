@@ -184,12 +184,12 @@ def lunchprinter(NeunBE, Mensa, Tech, Flags):
 			outfile_week.write(neunbe_names[i]+"\n  "+neunbe[j][i]+"\n")
 	outfile_week.close()	
 
-	image_d = text_image('today_out.txt')
-	image_d.save('today_out.png')
-	image_t = text_image('tomorrow_out.txt')
-	image_t.save('tomorrow_out.png')
-	image_w = text_image('week_out.txt')
-	image_w.save('week_out.png')
+	#image_d = text_image('today_out.txt')
+	#image_d.save('today_out.png')
+	#image_t = text_image('tomorrow_out.txt')
+	#image_t.save('tomorrow_out.png')
+	#image_w = text_image('week_out.txt')
+	#image_w.save('week_out.png')
 		
 ########## 9b - the people who can't name files in a coherent way ###############################
 flags=[]
@@ -216,7 +216,7 @@ except:
 	flags.append("9b Menǘ nicht verfügbar, eingetragenes Menü vermutlich falsch")
 
 img = Image.open(neunB_menu_file)
-area = (550,300,1300,1200)
+area = (570,320,1300,1300)
 img = img.crop(area)
 #img.show()
 
@@ -260,20 +260,35 @@ df = tabula.read_pdf(mensa_file, pages="all", lattice=True, guess=True, mulitple
 
 Men = np.ndarray((5,3),dtype=object)
 
-for jnd in range(0,5):
-	try:
-	#only if menu pdf has 2 pages:
-		if jnd != 4:
+
+try:
+	for jnd in range(0,5):
+		try:
+		#only if menu pdf has 2 pages:
+			if jnd != 4:
+				for i in range(0,3):
+					Men[jnd][i] = re.sub('(€ ?\d+\,\d{1,2})', "", df[0]['data'][jnd+2][i+1]['text'].replace("\r", " "))
+			else:
+				for i in range(0,3):
+					Men[jnd][i] = re.sub('(€ ?\d+\,\d{1,2})', "", df[2]['data'][1][i+1]['text'].replace("\r", ", "))
+		
+		except:
+		#single page:
 			for i in range(0,3):
 				Men[jnd][i] = re.sub('(€ ?\d+\,\d{1,2})', "", df[0]['data'][jnd+2][i+1]['text'].replace("\r", " "))
+except:
+	for jnd in range(0,5):
+		# triple page shenanigans:
+		if jnd == 0 or jnd == 1:
+			for i in range(0,3):
+				Men[jnd][i] = re.sub("!!(.*)!!","",re.sub('(€ ?\d+\,\d{1,2})', "", df[0]['data'][jnd+2][i+1]['text'].replace("\r", " ")))
+				
+		elif jnd == 2 or jnd == 3:			
+			for i in range(0,3):
+				Men[jnd][i] = re.sub("!!(.*)!!","",re.sub('(€ ?\d+\,\d{1,2})', "", df[2]['data'][jnd-1][i+1]['text'].replace("\r", ", ")))
 		else:
 			for i in range(0,3):
-				Men[jnd][i] = re.sub('(€ ?\d+\,\d{1,2})', "", df[2]['data'][1][i+1]['text'].replace("\r", ", "))
-	
-	except:
-	#single page:
-		for i in range(0,3):
-			Men[jnd][i] = re.sub('(€ ?\d+\,\d{1,2})', "", df[0]['data'][jnd+2][i+1]['text'].replace("\r", " "))
+				Men[jnd][i] = re.sub("!!(.*)!!","",re.sub('(€ ?\d+\,\d{1,2})', "", df[4]['data'][1][i+1]['text'].replace("\r", ", ")))
 
 ######################### TECH = locid 55 ####################################################
 tech_file = "tech_menu_week"+weeknumber+".pdf"
