@@ -35,9 +35,6 @@ def today(update, context):
 	menue_today = file_today.read()
 	file_today.close()
 	update.message.reply_text(menue_today, parse_mode=telegram.ParseMode.MARKDOWN)
-	#pictoday = open('today_out.png', 'rb')
-	#update.message.reply_photo(photo=pictoday)
-	#pictoday.close()
 
 def tomorrow(update, context):
 
@@ -45,11 +42,6 @@ def tomorrow(update, context):
 	menue_tomorrow = file_tomorrow.read()
 	file_tomorrow.close()
 	update.message.reply_text(menue_tomorrow, parse_mode=telegram.ParseMode.MARKDOWN)
-	#pictomorrow = open('tomorrow_out.png', 'rb')
-	#update.message.reply_photo(photo=pictomorrow)
-	#pictomorrow.close()
-
-
 
 def week(update, context):
 	
@@ -61,10 +53,6 @@ def week(update, context):
 		update.message.reply_text(menue_week[len(menue_week)//2:],parse_mode=telegram.ParseMode.MARKDOWN)
 	else:
 		update.message.reply_text(menue_week, parse_mode=telegram.ParseMode.MARKDOWN)
-	#picweek = open('week_out.png', 'rb')
-	#update.message.reply_photo(photo=picweek)
-	#picweek.close()
-
 
 def error(update, context):
 	"""Log Errors caused by Updates."""
