@@ -36,10 +36,10 @@ def lunchprinter(NeunBE, Mensa, Tech, Flags):
 	outfile_today = open("today_out.txt","w")
 	outfile_tomorrow = open("tomorrow_out.txt","w")
 	outfile_week = open("week_out.txt","w")
-	for i in range(len(flags)):		
-		outfile_today.write(flags[i])
-		outfile_tomorrow.write(flags[i])
-		outfile_week.write(flags[i])
+	for i in range(len(Flags)):		
+		outfile_today.write(Flags[i])
+		outfile_tomorrow.write(Flags[i])
+		outfile_week.write(Flags[i])
 
 	weekday = datetime.date.today().weekday()
 	day = days[weekday]
@@ -140,9 +140,9 @@ try:
 	request = browser.session.get(url_9b, stream=True)
 	corr_url = re.search("2019\" src=\"../pictures/((?s).*\">)", str(request.content))[0].split("<br>")[0].split("/")[2].split(".jpg\">")[0]
 except TypeError:
-	flags.append("9b Menue page down")
+	flags.append("*9b Menue page down* \n")
 	neunB_menu_file = "neunB_menu_week8.jpg"    # use a template menu from week 8/2019 so the rest at least works
-	flags.append("9b Menǘ nicht verfügbar, eingetragenes Menü vermutlich falsch")
+	flags.append("*9b Menü nicht verfügbar, eingetragenes Menü vermutlich falsch* \n")
 
 try: 
 	urllib.request.urlretrieve("http://neunbe.at/pictures/"+corr_url+".jpg", neunB_menu_file)	
@@ -150,7 +150,7 @@ try:
 # should specify on which exception except should act (for all excepts in the script)
 except:
 	neunB_menu_file = "neunB_menu_week8.jpg"    # use a template menu from week 8/2019 so the rest at least works
-	flags.append("9b Menǘ nicht verfügbar, eingetragenes Menü vermutlich falsch")
+	flags.append("*9b Menü nicht verfügbar, eingetragenes Menü vermutlich falsch*\n")
 
 img = Image.open(neunB_menu_file)
 area = (570,320,1300,1300)
@@ -160,7 +160,7 @@ img = img.crop(area)
 # language option needs installation of file in usr/share/tessseract/4.00/tessdata
 # --psm 6 is page separation mode option of tesseract, 6 uses image es single block of text, 3 is automatic/default
 # psm 3 is better when there are empty lines in the day column before the actual day e.g. \nMontag 
-out = pytesseract.image_to_string(img, lang="deu", config='--psm 6')
+out = pytesseract.image_to_string(img, lang="deu", config='--psm 3')   #TODO automate choice of psm
 #print(out)
 
 Mon = re.sub(" +", " ", re.search('Montag((?s).*)Dienstag', out).group(1).replace("\n"," ").replace(" , ",", ").strip())
@@ -190,7 +190,7 @@ try:
 	urllib.request.urlretrieve("http://menu.mensen.at//index/menu-pdf/locid/42?woy="+weeknumber+"&year="+year,mensa_file)
 except:
 	mensa_file = "mensa_menu_week48.pdf"	
-	flags.append("Mensa Menü nicht verfügbar, eingetragenes Menü vermutlich falsch")
+	flags.append("*Mensa Menü nicht verfügbar, eingetragenes Menü vermutlich falsch* \n")
 
 # Read pdf into json style DataFrame
 df = tabula.read_pdf(mensa_file, pages="all", lattice=True, guess=True, mulitple_tables=True ,output_format="json")
@@ -233,10 +233,16 @@ try:
 	urllib.request.urlretrieve("http://menu.mensen.at//index/menu-pdf/locid/55?woy="+weeknumber+"&year="+year,tech_file)
 except: 
 	tech_file = "tech_menu_week48.pdf"	
-	flags.append("TechCafe Menü nicht verfügbar, eingetragenes Menü vermutlich falsch")
+	flags.append("*TechCafe Menü nicht verfügbar, eingetragenes Menü vermutlich falsch* \n")
 
 # similar as for mensa
 df2 = tabula.read_pdf(tech_file, pages="all", lattice=True, guess=True, mulitple_tables=True ,output_format="json")
+
+#for empy pdfs as they tend to happen only for tech, but should be implemented for all in the future!
+if len(df2) < 1:
+	tech_file = "tech_menu_week48.pdf"
+	df2 = tabula.read_pdf(tech_file, pages="all", lattice=True, guess=True, mulitple_tables=True ,output_format="json")	
+	flags.append("*TechCafe Menü nicht verfügbar, eingetragenes Menü vermutlich falsch* \n")
 
 Tec = np.ndarray((5,3),dtype=object)
 
