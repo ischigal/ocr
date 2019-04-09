@@ -153,14 +153,14 @@ except:
 	flags.append("*9b Menü nicht verfügbar, eingetragenes Menü vermutlich falsch*\n")
 
 img = Image.open(neunB_menu_file)
-area = (570,320,1300,1300)
+area = (580,320,1300,1300)
 img = img.crop(area)
 #img.show()
 
 # language option needs installation of file in usr/share/tessseract/4.00/tessdata
 # --psm 6 is page separation mode option of tesseract, 6 uses image es single block of text, 3 is automatic/default
 # psm 3 is better when there are empty lines in the day column before the actual day e.g. \nMontag 
-out = pytesseract.image_to_string(img, lang="deu", config='--psm 3')   #TODO automate choice of psm
+out = pytesseract.image_to_string(img, lang="deu", config='--psm 6')   #TODO automate choice of psm
 #print(out)
 
 Mon = re.sub(" +", " ", re.search('Montag((?s).*)Dienstag', out).group(1).replace("\n"," ").replace(" , ",", ").strip())
@@ -172,7 +172,10 @@ Fre = re.sub(" +", " ", re.search('Freitag((?s).*)Monatsburger', out).group(1).r
 # TODO: add price to output?
 
 MBurger = re.sub(" +", " ", re.search('Monatsburger:((?s).*)\s\u20AC((?s).*)Wochenburger', out).group(1).replace("\n", " ").replace(" , ",", ").strip())
-WBurger = re.sub(" +", " ", re.search('Wochenburger:((?s).*)\s\u20AC', out).group(1).replace("\n", " ").replace(" , ",", ").strip())
+try:
+	WBurger = re.sub(" +", " ", re.search('Wochenburger:((?s).*)\s\u20AC', out).group(1).replace("\n", " ").replace(" , ",", ").strip())
+except AttributeError:
+	WBurger = re.sub(" +", " ", re.search('Wochenburger:((?s).*)Valle', out).group(1).replace("\n", " ").replace(" , ",", ").strip())
 
 daylist = [Mon,Die,Mit,Don,Fre]
 NeunB = np.ndarray((5,3),dtype=object)
