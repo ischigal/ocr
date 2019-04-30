@@ -1,3 +1,2 @@
 # ocr
-Python script used for printing the menu of the 3 lunch options on UIBK-Technik campus.
-Probably needs to be completely reworked to deal with the different possible inputs of the menus. 
+Source code for the Telegram bot "uibk_technik_lunch_menue_bot". It prints the lunch menue at the three options at the Technik Campus of the University of Innsbruck. Currently under continuous developement. Not expected to work reliably. Suggestions very welcome. 
