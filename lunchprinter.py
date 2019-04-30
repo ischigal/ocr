@@ -160,7 +160,13 @@ img = img.crop(area)
 # language option needs installation of file in usr/share/tessseract/4.00/tessdata
 # --psm 6 is page separation mode option of tesseract, 6 uses image es single block of text, 3 is automatic/default
 # psm 3 is better when there are empty lines in the day column before the actual day e.g. \nMontag 
-out = pytesseract.image_to_string(img, lang="deu", config='--psm 6')   #TODO automate choice of psm
+
+try:
+	out = pytesseract.image_to_string(img, lang="deu", config='--psm 6')
+except:
+	flags.append("DEV_INFO: --psm 3 was used")
+	out = pytesseract.image_to_string(img, lang="deu", config='--psm 3')   # usually worse when both work, but works more often
+
 #print(out)
 
 Mon = re.sub(" +", " ", re.search('Montag((?s).*)Dienstag', out).group(1).replace("\n"," ").replace(" , ",", ").strip())
@@ -172,6 +178,7 @@ Fre = re.sub(" +", " ", re.search('Freitag((?s).*)Monatsburger', out).group(1).r
 # TODO: add price to output?
 
 MBurger = re.sub(" +", " ", re.search('Monatsburger:((?s).*)\s\u20AC((?s).*)Wochenburger', out).group(1).replace("\n", " ").replace(" , ",", ").strip())
+
 try:
 	WBurger = re.sub(" +", " ", re.search('Wochenburger:((?s).*)\s\u20AC', out).group(1).replace("\n", " ").replace(" , ",", ").strip())
 except AttributeError:
