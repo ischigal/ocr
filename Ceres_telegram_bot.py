@@ -35,10 +35,10 @@ def today(update, context):
 
 	user_ID = update.message.from_user['id']
 	if user_ID == DEVID:
-		file_flags = open("flags_out.txt","r")
-		flags_today = file_flags.read()
-		file_flags.close()
-		update.message.reply_text(flags_today, parse_mode=telegram.ParseMode.MARKDOWN)		
+		file_dev_flags = open("dev_flags_out.txt","r")
+		dev_flags_today = file_dev_flags.read()
+		file_dev_flags.close()
+		update.message.reply_text(dev_flags_today, parse_mode=telegram.ParseMode.MARKDOWN)		
 	
 	file_today = open("today_out.txt","r")
 	menue_today = file_today.read()
@@ -49,10 +49,10 @@ def tomorrow(update, context):
 
 	user_ID = update.message.from_user['id']
 	if user_ID == DEVID:
-		file_flags = open("flags_out.txt","r")
-		flags_today = file_flags.read()
-		file_flags.close()
-		update.message.reply_text(flags_today, parse_mode=telegram.ParseMode.MARKDOWN)	
+		file_dev_flags = open("dev_flags_out.txt","r")
+		dev_flags_today = file_dev_flags.read()
+		file_dev_flags.close()
+		update.message.reply_text(dev_flags_today, parse_mode=telegram.ParseMode.MARKDOWN)	
 
 	file_tomorrow = open("tomorrow_out.txt","r")
 	menue_tomorrow = file_tomorrow.read()
@@ -63,10 +63,10 @@ def week(update, context):
 	
 	user_ID = update.message.from_user['id']
 	if user_ID == DEVID:
-		file_flags = open("flags_out.txt","r")
-		flags_today = file_flags.read()
-		file_flags.close()
-		update.message.reply_text(flags_today, parse_mode=telegram.ParseMode.MARKDOWN)	
+		file_dev_flags = open("dev_flags_out.txt","r")
+		dev_flags_today = file_dev_flags.read()
+		file_dev_flags.close()
+		update.message.reply_text(dev_flags_today, parse_mode=telegram.ParseMode.MARKDOWN)	
 
 	file_week = open("week_out.txt","r")
 	menue_week = file_week.read()

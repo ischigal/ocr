@@ -26,7 +26,7 @@ year = str(datetime.date.today().year)
 
 ###################################################################################################
 
-def lunchprinter(NeunBE, Mensa, Tech, Flags):
+def lunchprinter(NeunBE, Mensa, Tech, Flags, DevFlags):
 	
 	mensa_names = ['_Menü Classic:_ \t', '_Vegetarisch:_ \t', '_Tagesteller:_ \t']
 	tech_names = ['_Tagesteller:_ \t', '_Vegetarisch:_ \t', '_Pasta:_ \t\t']
@@ -36,9 +36,15 @@ def lunchprinter(NeunBE, Mensa, Tech, Flags):
 	outfile_today = open("today_out.txt","w")
 	outfile_tomorrow = open("tomorrow_out.txt","w")
 	outfile_week = open("week_out.txt","w")
-	outfile_flags = open("flags_out.txt","w")
+	outfile_dev_flags = open("dev_flags_out.txt","w")
+
 	for i in range(len(Flags)):		
-		outfile_flags.write(Flags[i])
+		outfile_today.write(Flags[i])
+		outfile_tomorrow.write(Flags[i])
+		outfile_week.write(Flags[i])
+
+	for j in range(len(DevFlags)):
+		outfile_flags.wirte(DevFlags[j])
 
 	weekday = datetime.date.today().weekday()
 	day = days[weekday]
@@ -129,6 +135,7 @@ def lunchprinter(NeunBE, Mensa, Tech, Flags):
 		
 ########## 9b - the people who can't name files in a coherent way ###############################
 flags=[]
+dev_flags=[]
 
 neunB_menu_file = "neunB_menu_week"+weeknumber+".jpg"
 
@@ -169,7 +176,7 @@ try:
 	Fre = re.sub(" +", " ", re.search('Freitag((?s).*)Monatsburger', out).group(1).replace("\n"," ").replace(" , ",", ").strip())
 
 except AttributeError:
-	flags.append("DEVINFO: --psm 3 was used\n")
+	dev_flags.append("DEVINFO: --psm 3 was used\n")
 	out = pytesseract.image_to_string(img, lang="deu", config='--psm 3')   # usually worse when both work, but works more often
 	Mon = re.sub(" +", " ", re.search('Montag((?s).*)Dienstag', out).group(1).replace("\n"," ").replace(" , ",", ").strip())
 	Die = re.sub(" +", " ", re.search('Dienstag((?s).*)Mittwoch', out).group(1).replace("\n"," ").replace(" , ",", ").strip())
@@ -266,6 +273,6 @@ for knd in range(0,5):
 
 ###################################################################################################
 
-lunchprinter(NeunB,Men,Tec,flags)
+lunchprinter(NeunB,Men,Tec,flags,dev_flags)
 
 #TODO delete files after reading?!
