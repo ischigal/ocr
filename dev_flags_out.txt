@@ -1,0 +1,1 @@
+DEVINFO: --psm 3 was used

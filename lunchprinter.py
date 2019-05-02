@@ -44,7 +44,7 @@ def lunchprinter(NeunBE, Mensa, Tech, Flags, DevFlags):
 		outfile_week.write(Flags[i])
 
 	for j in range(len(DevFlags)):
-		outfile_flags.wirte(DevFlags[j])
+		outfile_dev_flags.write(DevFlags[j])
 
 	weekday = datetime.date.today().weekday()
 	day = days[weekday]
