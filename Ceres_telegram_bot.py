@@ -6,6 +6,7 @@ from subprocess import call
 import threading
 
 key = open("botkey.txt").readlines()[0].strip()
+DEVID = open("botkey.txt").readlines()[1].strip() 
 
 def refreshmenue():
 	call(["python","lunchprinter.py"])
@@ -33,70 +34,48 @@ def help(update, context):
 def today(update, context):
 
 	user_ID = update.message.from_user['id']
-	if user_ID == 760744193:
+	if user_ID == DEVID:
 		file_flags = open("flags_out.txt","r")
 		flags_today = file_flags.read()
 		file_flags.close()
 		update.message.reply_text(flags_today, parse_mode=telegram.ParseMode.MARKDOWN)		
 	
-		file_today = open("today_out.txt","r")
-		menue_today = file_today.read()
-		file_today.close()
-		update.message.reply_text(menue_today, parse_mode=telegram.ParseMode.MARKDOWN)
-
-	else:
-		file_today = open("today_out.txt","r")
-		menue_today = file_today.read()
-		file_today.close()
-		update.message.reply_text(menue_today, parse_mode=telegram.ParseMode.MARKDOWN)
+	file_today = open("today_out.txt","r")
+	menue_today = file_today.read()
+	file_today.close()
+	update.message.reply_text(menue_today, parse_mode=telegram.ParseMode.MARKDOWN)
 
 def tomorrow(update, context):
 
 	user_ID = update.message.from_user['id']
-	if user_ID == 760744193:
+	if user_ID == DEVID:
 		file_flags = open("flags_out.txt","r")
 		flags_today = file_flags.read()
 		file_flags.close()
 		update.message.reply_text(flags_today, parse_mode=telegram.ParseMode.MARKDOWN)	
-		
-		file_tomorrow = open("tomorrow_out.txt","r")
-		menue_tomorrow = file_tomorrow.read()
-		file_tomorrow.close()
-		update.message.reply_text(menue_tomorrow, parse_mode=telegram.ParseMode.MARKDOWN)
 
-	else:
-		file_tomorrow = open("tomorrow_out.txt","r")
-		menue_tomorrow = file_tomorrow.read()
-		file_tomorrow.close()
-		update.message.reply_text(menue_tomorrow, parse_mode=telegram.ParseMode.MARKDOWN)
+	file_tomorrow = open("tomorrow_out.txt","r")
+	menue_tomorrow = file_tomorrow.read()
+	file_tomorrow.close()
+	update.message.reply_text(menue_tomorrow, parse_mode=telegram.ParseMode.MARKDOWN)
 
 def week(update, context):
 	
 	user_ID = update.message.from_user['id']
-	if user_ID == 760744193:
+	if user_ID == DEVID:
 		file_flags = open("flags_out.txt","r")
 		flags_today = file_flags.read()
 		file_flags.close()
 		update.message.reply_text(flags_today, parse_mode=telegram.ParseMode.MARKDOWN)	
 
-		file_week = open("week_out.txt","r")
-		menue_week = file_week.read()
-		file_week.close()
-		if len(menue_week) > 4000:
-			update.message.reply_text(menue_week[:len(menue_week)//2],parse_mode=telegram.ParseMode.MARKDOWN)
-			update.message.reply_text(menue_week[len(menue_week)//2:],parse_mode=telegram.ParseMode.MARKDOWN)
-		else:
-			update.message.reply_text(menue_week, parse_mode=telegram.ParseMode.MARKDOWN)
-
+	file_week = open("week_out.txt","r")
+	menue_week = file_week.read()
+	file_week.close()
+	if len(menue_week) > 4000:
+		update.message.reply_text(menue_week[:len(menue_week)//2],parse_mode=telegram.ParseMode.MARKDOWN)
+		update.message.reply_text(menue_week[len(menue_week)//2:],parse_mode=telegram.ParseMode.MARKDOWN)
 	else:
-		file_week = open("week_out.txt","r")
-		menue_week = file_week.read()
-		file_week.close()
-		if len(menue_week) > 4000:
-			update.message.reply_text(menue_week[:len(menue_week)//2],parse_mode=telegram.ParseMode.MARKDOWN)
-			update.message.reply_text(menue_week[len(menue_week)//2:],parse_mode=telegram.ParseMode.MARKDOWN)
-		else:
-			update.message.reply_text(menue_week, parse_mode=telegram.ParseMode.MARKDOWN)
+		update.message.reply_text(menue_week, parse_mode=telegram.ParseMode.MARKDOWN)
 
 def error(update, context):
 	"""Log Errors caused by Updates."""
