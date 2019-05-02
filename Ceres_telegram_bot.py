@@ -27,32 +27,76 @@ def start(update, context):
 
 def help(update, context):
 	"""Send a message when the command /help is issued."""
+	
 	update.message.reply_text('Use:\n /today for today\'s lunch \n /tomorrow for tomorrow\'s lunch \n /week for the entire week menue')
 
 def today(update, context):
 
-	file_today = open("today_out.txt","r")
-	menue_today = file_today.read()
-	file_today.close()
-	update.message.reply_text(menue_today, parse_mode=telegram.ParseMode.MARKDOWN)
+	user_ID = update.message.from_user['id']
+	if user_ID == 760744193:
+		file_flags = open("flags_out.txt","r")
+		flags_today = file_flags.read()
+		file_flags.close()
+		update.message.reply_text(flags_today, parse_mode=telegram.ParseMode.MARKDOWN)		
+	
+		file_today = open("today_out.txt","r")
+		menue_today = file_today.read()
+		file_today.close()
+		update.message.reply_text(menue_today, parse_mode=telegram.ParseMode.MARKDOWN)
+
+	else:
+		file_today = open("today_out.txt","r")
+		menue_today = file_today.read()
+		file_today.close()
+		update.message.reply_text(menue_today, parse_mode=telegram.ParseMode.MARKDOWN)
 
 def tomorrow(update, context):
 
-	file_tomorrow = open("tomorrow_out.txt","r")
-	menue_tomorrow = file_tomorrow.read()
-	file_tomorrow.close()
-	update.message.reply_text(menue_tomorrow, parse_mode=telegram.ParseMode.MARKDOWN)
+	user_ID = update.message.from_user['id']
+	if user_ID == 760744193:
+		file_flags = open("flags_out.txt","r")
+		flags_today = file_flags.read()
+		file_flags.close()
+		update.message.reply_text(flags_today, parse_mode=telegram.ParseMode.MARKDOWN)	
+		
+		file_tomorrow = open("tomorrow_out.txt","r")
+		menue_tomorrow = file_tomorrow.read()
+		file_tomorrow.close()
+		update.message.reply_text(menue_tomorrow, parse_mode=telegram.ParseMode.MARKDOWN)
+
+	else:
+		file_tomorrow = open("tomorrow_out.txt","r")
+		menue_tomorrow = file_tomorrow.read()
+		file_tomorrow.close()
+		update.message.reply_text(menue_tomorrow, parse_mode=telegram.ParseMode.MARKDOWN)
 
 def week(update, context):
 	
-	file_week = open("week_out.txt","r")
-	menue_week = file_week.read()
-	file_week.close()
-	if len(menue_week) > 4000:
-		update.message.reply_text(menue_week[:len(menue_week)//2],parse_mode=telegram.ParseMode.MARKDOWN)
-		update.message.reply_text(menue_week[len(menue_week)//2:],parse_mode=telegram.ParseMode.MARKDOWN)
+	user_ID = update.message.from_user['id']
+	if user_ID == 760744193:
+		file_flags = open("flags_out.txt","r")
+		flags_today = file_flags.read()
+		file_flags.close()
+		update.message.reply_text(flags_today, parse_mode=telegram.ParseMode.MARKDOWN)	
+
+		file_week = open("week_out.txt","r")
+		menue_week = file_week.read()
+		file_week.close()
+		if len(menue_week) > 4000:
+			update.message.reply_text(menue_week[:len(menue_week)//2],parse_mode=telegram.ParseMode.MARKDOWN)
+			update.message.reply_text(menue_week[len(menue_week)//2:],parse_mode=telegram.ParseMode.MARKDOWN)
+		else:
+			update.message.reply_text(menue_week, parse_mode=telegram.ParseMode.MARKDOWN)
+
 	else:
-		update.message.reply_text(menue_week, parse_mode=telegram.ParseMode.MARKDOWN)
+		file_week = open("week_out.txt","r")
+		menue_week = file_week.read()
+		file_week.close()
+		if len(menue_week) > 4000:
+			update.message.reply_text(menue_week[:len(menue_week)//2],parse_mode=telegram.ParseMode.MARKDOWN)
+			update.message.reply_text(menue_week[len(menue_week)//2:],parse_mode=telegram.ParseMode.MARKDOWN)
+		else:
+			update.message.reply_text(menue_week, parse_mode=telegram.ParseMode.MARKDOWN)
 
 def error(update, context):
 	"""Log Errors caused by Updates."""
@@ -74,7 +118,7 @@ def main():
 	dp.add_handler(CommandHandler("today", today))
 	dp.add_handler(CommandHandler("tomorrow", tomorrow))
 	dp.add_handler(CommandHandler("week", week))
-
+	
 	# on noncommand - send help info:
 	dp.add_handler(MessageHandler(Filters.text, help))
 

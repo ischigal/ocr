@@ -36,10 +36,9 @@ def lunchprinter(NeunBE, Mensa, Tech, Flags):
 	outfile_today = open("today_out.txt","w")
 	outfile_tomorrow = open("tomorrow_out.txt","w")
 	outfile_week = open("week_out.txt","w")
+	outfile_flags = open("flags_out.txt","w")
 	for i in range(len(Flags)):		
-		outfile_today.write(Flags[i])
-		outfile_tomorrow.write(Flags[i])
-		outfile_week.write(Flags[i])
+		outfile_flags.write(Flags[i])
 
 	weekday = datetime.date.today().weekday()
 	day = days[weekday]
