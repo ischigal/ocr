@@ -168,8 +168,9 @@ try:
 	Mit = re.sub(" +", " ", re.search('Mittwoch((?s).*)Donnerstag', out).group(1).replace("\n"," ").replace(" , ",", ").strip())
 	Don = re.sub(" +", " ", re.search('Donnerstag((?s).*)Freitag', out).group(1).replace("\n"," ").replace(" , ",", ").strip())
 	Fre = re.sub(" +", " ", re.search('Freitag((?s).*)Monatsburger', out).group(1).replace("\n"," ").replace(" , ",", ").strip())
-except:
-	flags.append("DEV_INFO: --psm 3 was used")
+
+except AttributeError:
+	flags.append("DEVINFO: --psm 3 was used\n")
 	out = pytesseract.image_to_string(img, lang="deu", config='--psm 3')   # usually worse when both work, but works more often
 	Mon = re.sub(" +", " ", re.search('Montag((?s).*)Dienstag', out).group(1).replace("\n"," ").replace(" , ",", ").strip())
 	Die = re.sub(" +", " ", re.search('Dienstag((?s).*)Mittwoch', out).group(1).replace("\n"," ").replace(" , ",", ").strip())
@@ -177,8 +178,6 @@ except:
 	Don = re.sub(" +", " ", re.search('Donnerstag((?s).*)Freitag', out).group(1).replace("\n"," ").replace(" , ",", ").strip())
 	Fre = re.sub(" +", " ", re.search('Freitag((?s).*)Monatsburger', out).group(1).replace("\n"," ").replace(" , ",", ").strip())
 #print(out)
-
-
 
 # TODO: add price to output?
 
