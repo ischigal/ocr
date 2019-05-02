@@ -6,7 +6,7 @@ from subprocess import call
 import threading
 
 key = open("botkey.txt").readlines()[0].strip()
-DEVID = open("botkey.txt").readlines()[1].strip() 
+DEVID = int(open("botkey.txt").readlines()[1].strip()) 
 
 def refreshmenue():
 	call(["python","lunchprinter.py"])
