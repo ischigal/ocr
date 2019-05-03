@@ -1,4 +1,4 @@
-import telegram
+import telegram  # make sure that python-telegram-bot 12 or newer is installed 
 import logging
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 
@@ -8,8 +8,8 @@ import threading
 key = open("botkey.txt").readlines()[0].strip()
 DEVID = int(open("botkey.txt").readlines()[1].strip()) 
 
-def refreshmenue():
-	call(["python","lunchprinter.py"])
+def refreshmenue():   # TODO rework this function using import lunchprinter or something
+	call(["python3","lunchprinter.py"])
 	threading.Timer(600, refreshmenue).start()
 
 refreshmenue()
@@ -22,12 +22,12 @@ logger = logging.getLogger(__name__)
 
 # Define a few command handlers. These usually take the two arguments bot and
 # update. Error handlers also receive the raised TelegramError object in error.
-def start(update, context):
+def start(update):
 	"""Send a message when the command /start is issued."""
 	update.message.reply_text('Hi!') 
 	update.message.reply_text('Use:\n /today for today\'s lunch \n /tomorrow for tomorrow\'s lunch \n /week for the entire week menue') # immidiately show options 
 
-def help(update, context):
+def help(update):
 	"""Send a message when the command /help is issued."""
 	
 	update.message.reply_text('Use:\n /today for today\'s lunch \n /tomorrow for tomorrow\'s lunch \n /week for the entire week menue')
