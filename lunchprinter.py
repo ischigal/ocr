@@ -150,7 +150,7 @@ try:
 
 except TypeError:
 	dev_flags.append("9b menue page down\n")
-	neunB_menu_file = "neunB_menu_week8.jpg"    # use a template menu from week 8/2019 so the rest at least works
+	neunB_menu_file = "neunB_menu_DEFAULT.jpg"    # use a template menu from week 8/2019 so the rest at least works
 	flags.append("*9b Menü nicht verfügbar, eingetragenes Menü vermutlich falsch* \n")
 
 try: 
@@ -159,7 +159,7 @@ try:
 # should specify on which exception except should act (for all excepts in the script)
 except:
 	dev_flags.append("9b menue probably not uploaded yet\n")
-	neunB_menu_file = "neunB_menu_week8.jpg"    # use a template menu from week 8/2019 so the rest at least works
+	neunB_menu_file = "neunB_menu_DEFAULT.jpg"    # use a template menu from week 8/2019 so the rest at least works
 	flags.append("*9b Menü nicht verfügbar, eingetragenes Menü vermutlich falsch*\n")
 
 img = Image.open(neunB_menu_file)
@@ -218,7 +218,7 @@ mensa_file = "mensa_menu_week"+weeknumber+".pdf"
 try:
 	urllib.request.urlretrieve("http://menu.mensen.at//index/menu-pdf/locid/42?woy="+weeknumber+"&year="+year,mensa_file)
 except:
-	mensa_file = "mensa_menu_week48.pdf"	
+	mensa_file = "mensa_menu_DEFAULT.pdf"	
 	flags.append("*Mensa Menü nicht verfügbar, eingetragenes Menü vermutlich falsch* \n")
 
 # Read pdf into json style DataFrame
@@ -226,7 +226,7 @@ df = tabula.read_pdf(mensa_file, pages="all", lattice=True, guess=True, mulitple
 
 #for the case of empty pdf of the menue
 if len(df) < 1:
-	mensa_file = "mensa_menu_week48.pdf"
+	mensa_file = "mensa_menu_DEFAULT.pdf"
 	df = tabula.read_pdf(mensa_file, pages="all", lattice=True, guess=True, mulitple_tables=True ,output_format="json")	
 	flags.append("*Mensa Menü nicht verfügbar, eingetragenes Menü vermutlich falsch* \n")
 
@@ -267,7 +267,7 @@ tech_file = "tech_menu_week"+weeknumber+".pdf"
 try:
 	urllib.request.urlretrieve("http://menu.mensen.at//index/menu-pdf/locid/55?woy="+weeknumber+"&year="+year,tech_file)
 except: 
-	tech_file = "tech_menu_week48.pdf"	
+	tech_file = "tech_menu_DEFAULT.pdf"	
 	flags.append("*TechCafe Menü nicht verfügbar, eingetragenes Menü vermutlich falsch* \n")
 
 # similar as for mensa
@@ -275,7 +275,7 @@ df2 = tabula.read_pdf(tech_file, pages="all", lattice=True, guess=True, mulitple
 
 #for the case of empty pdf of the menue
 if len(df2) < 1:
-	tech_file = "tech_menu_week48.pdf"
+	tech_file = "tech_menu_DEFAULT.pdf"
 	df2 = tabula.read_pdf(tech_file, pages="all", lattice=True, guess=True, mulitple_tables=True ,output_format="json")	
 	flags.append("*TechCafe Menü nicht verfügbar, eingetragenes Menü vermutlich falsch* \n")
 
