@@ -32,7 +32,7 @@ def help(update, context):
 	
 	update.message.reply_text('Use:\n /today for today\'s lunch \n /tomorrow for tomorrow\'s lunch \n /week for the entire week menue')
 
-def DEV_INFO():
+def DEV_INFO(update):
 	user_ID = update.message.from_user['id']
 	if user_ID == DEVID:
 		file_dev_flags = open("dev_flags_out.txt","r")
@@ -42,7 +42,7 @@ def DEV_INFO():
 
 def today(update, context):
 
-	DEV_INFO()	
+	DEV_INFO(update)	
 	file_today = open("today_out.txt","r")
 	menue_today = file_today.read()
 	file_today.close()
@@ -50,7 +50,7 @@ def today(update, context):
 
 def tomorrow(update, context):
 
-	DEV_INFO()
+	DEV_INFO(update)
 	file_tomorrow = open("tomorrow_out.txt","r")
 	menue_tomorrow = file_tomorrow.read()
 	file_tomorrow.close()
@@ -58,7 +58,7 @@ def tomorrow(update, context):
 
 def week(update, context):
 	
-	DEV_INFO()
+	DEV_INFO(update)
 	file_week = open("week_out.txt","r")
 	menue_week = file_week.read()
 	file_week.close()
