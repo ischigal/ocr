@@ -1,15 +1,17 @@
 import telegram  # make sure that python-telegram-bot 12 or newer is installed 
 import logging
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
-
-from subprocess import call
 import threading
+import datetime
+
+import lunchprinter
 
 key = open("botkey.txt").readlines()[0].strip()
 DEVID = int(open("botkey.txt").readlines()[1].strip()) 
 
 def refreshmenue():   # TODO rework this function using import lunchprinter or something
-	call(["python3","lunchprinter.py"])
+	lunchprinter.lunchPrinter()
+	print("last update", datetime.datetime.now())
 	threading.Timer(600, refreshmenue).start()
 
 refreshmenue()
@@ -32,17 +34,17 @@ def help(update):
 	
 	update.message.reply_text('Use:\n /today for today\'s lunch \n /tomorrow for tomorrow\'s lunch \n /week for the entire week menue')
 
-def DEV_INFO(update):
+def DEV_INFO(update, day):
 	user_ID = update.message.from_user['id']
 	if user_ID == DEVID:
-		file_dev_flags = open("dev_flags_out.txt","r")
-		dev_flags_today = file_dev_flags.read()
+		file_dev_flags = open("dev_flags_"+day+"_out.txt","r")
+		dev_flags = file_dev_flags.read()
 		file_dev_flags.close()
-		update.message.reply_text(dev_flags_today, parse_mode=telegram.ParseMode.MARKDOWN)	
+		update.message.reply_text(dev_flags, parse_mode=telegram.ParseMode.MARKDOWN)	
 
 def today(update, context):
 
-	DEV_INFO(update)	
+	DEV_INFO(update, "today")	
 	file_today = open("today_out.txt","r")
 	menue_today = file_today.read()
 	file_today.close()
@@ -50,7 +52,7 @@ def today(update, context):
 
 def tomorrow(update, context):
 
-	DEV_INFO(update)
+	DEV_INFO(update, "tomorrow")
 	file_tomorrow = open("tomorrow_out.txt","r")
 	menue_tomorrow = file_tomorrow.read()
 	file_tomorrow.close()
@@ -58,7 +60,7 @@ def tomorrow(update, context):
 
 def week(update, context):
 	
-	DEV_INFO(update)
+	DEV_INFO(update, "week")
 	file_week = open("week_out.txt","r")
 	menue_week = file_week.read()
 	file_week.close()
