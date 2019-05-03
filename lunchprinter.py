@@ -81,9 +81,10 @@ def lunchprinter(NeunBE, Mensa, Tech, Flags, DevFlags):
 			outfile_today.write(neunbe_names[i]+"\n  "+neunbe[i]+"\n")
 	
 	outfile_today.close()		
-	weekday = (datetime.date.today()+datetime.timedelta(days=1)).weekday()	
+	weekday = (datetime.date.today()+datetime.timedelta(days=1)).weekday()	# go from today to tomorrow
 	day = days[weekday]
-		
+	
+	# TODO this doesn't actually give any information about the real menue next week, need to actually load future menu ^^
 	if weekday >= 5:
 		mensa = Mensa[0]
 		tech = Tech[0]
@@ -116,6 +117,7 @@ def lunchprinter(NeunBE, Mensa, Tech, Flags, DevFlags):
 			outfile_tomorrow.write(neunbe_names[i]+"\n  "+neunbe[i]+"\n")
 	outfile_tomorrow.close()
 	
+	# whole week:
 	mensa = Mensa
 	tech = Tech
 	neunbe = NeunBE
@@ -145,8 +147,9 @@ try:
 	browser.open(url_9b)
 	request = browser.session.get(url_9b, stream=True)
 	corr_url = re.search("2019\" src=\"../pictures/((?s).*\">)", str(request.content))[0].split("<br>")[0].split("/")[2].split(".jpg\">")[0]
+
 except TypeError:
-	flags.append("*9b Menue page down* \n")
+	dev_flags.append("9b menue page down\n")
 	neunB_menu_file = "neunB_menu_week8.jpg"    # use a template menu from week 8/2019 so the rest at least works
 	flags.append("*9b Menü nicht verfügbar, eingetragenes Menü vermutlich falsch* \n")
 
@@ -155,6 +158,7 @@ try:
 
 # should specify on which exception except should act (for all excepts in the script)
 except:
+	dev_flags.append("9b menue probably not uploaded yet\n")
 	neunB_menu_file = "neunB_menu_week8.jpg"    # use a template menu from week 8/2019 so the rest at least works
 	flags.append("*9b Menü nicht verfügbar, eingetragenes Menü vermutlich falsch*\n")
 
@@ -163,10 +167,13 @@ area = (580,310,1300,1300)
 img = img.crop(area)
 #img.show()
 
-# language option needs installation of file in usr/share/tessseract/4.00/tessdata
-# --psm 6 is page separation mode option of tesseract, 6 uses image es single block of text, 3 is automatic/default
+# notes on pytesseract:
+# language option needs installation of training files in usr/share/tessseract/4.00/tessdata
+# --psm is page separation mode option of tesseract, 6 uses image es single block of text, 3 is automatic/default
 # psm 3 is better when there are empty lines in the day column before the actual day e.g. \nMontag 
+# psm 6 recovers text better (both grammar and orthography) but does not work all the time, so try this first
 
+# have to put all Mon/Die/Mit/Don/Fre in the try block as they can give AttributeErrors in addition to out
 try:
 	out = pytesseract.image_to_string(img, lang="deu", config='--psm 6')
 	Mon = re.sub(" +", " ", re.search('Montag((?s).*)Dienstag', out).group(1).replace("\n"," ").replace(" , ",", ").strip())
@@ -176,8 +183,8 @@ try:
 	Fre = re.sub(" +", " ", re.search('Freitag((?s).*)Monatsburger', out).group(1).replace("\n"," ").replace(" , ",", ").strip())
 
 except AttributeError:
-	dev_flags.append("DEVINFO: --psm 3 was used\n")
-	out = pytesseract.image_to_string(img, lang="deu", config='--psm 3')   # usually worse when both work, but works more often
+	dev_flags.append("--psm 3 was used\n")
+	out = pytesseract.image_to_string(img, lang="deu", config='--psm 3')
 	Mon = re.sub(" +", " ", re.search('Montag((?s).*)Dienstag', out).group(1).replace("\n"," ").replace(" , ",", ").strip())
 	Die = re.sub(" +", " ", re.search('Dienstag((?s).*)Mittwoch', out).group(1).replace("\n"," ").replace(" , ",", ").strip())
 	Mit = re.sub(" +", " ", re.search('Mittwoch((?s).*)Donnerstag', out).group(1).replace("\n"," ").replace(" , ",", ").strip())
@@ -185,12 +192,14 @@ except AttributeError:
 	Fre = re.sub(" +", " ", re.search('Freitag((?s).*)Monatsburger', out).group(1).replace("\n"," ").replace(" , ",", ").strip())
 #print(out)
 
-# TODO: add price to output?
+# TODO: add price to output? consistently remove (or add) allergy information?
 
 MBurger = re.sub(" +", " ", re.search('Monatsburger:((?s).*)\s\u20AC((?s).*)Wochenburger', out).group(1).replace("\n", " ").replace(" , ",", ").strip())
 
+# try block for the case that the price is not read by pytesseract or ommited by the menue creator
 try:
 	WBurger = re.sub(" +", " ", re.search('Wochenburger:((?s).*)\s\u20AC', out).group(1).replace("\n", " ").replace(" , ",", ").strip())
+
 except AttributeError:
 	WBurger = re.sub(" +", " ", re.search('Wochenburger:((?s).*)Valle', out).group(1).replace("\n", " ").replace(" , ",", ").strip())
 
@@ -215,9 +224,15 @@ except:
 # Read pdf into json style DataFrame
 df = tabula.read_pdf(mensa_file, pages="all", lattice=True, guess=True, mulitple_tables=True ,output_format="json")
 
+#for the case of empty pdf of the menue
+if len(df) < 1:
+	mensa_file = "mensa_menu_week48.pdf"
+	df = tabula.read_pdf(mensa_file, pages="all", lattice=True, guess=True, mulitple_tables=True ,output_format="json")	
+	flags.append("*Mensa Menü nicht verfügbar, eingetragenes Menü vermutlich falsch* \n")
+
 Men = np.ndarray((5,3),dtype=object)
 
-
+# try blocks for different pdf lengths. usually menue has two pages but single page and three page is covered as well. three page is special as it probably was a one time thing with additional strange formatting
 try:
 	for jnd in range(0,5):
 		try:
@@ -258,7 +273,7 @@ except:
 # similar as for mensa
 df2 = tabula.read_pdf(tech_file, pages="all", lattice=True, guess=True, mulitple_tables=True ,output_format="json")
 
-#for empy pdfs as they tend to happen only for tech, but should be implemented for all in the future!
+#for the case of empty pdf of the menue
 if len(df2) < 1:
 	tech_file = "tech_menu_week48.pdf"
 	df2 = tabula.read_pdf(tech_file, pages="all", lattice=True, guess=True, mulitple_tables=True ,output_format="json")	
@@ -266,6 +281,7 @@ if len(df2) < 1:
 
 Tec = np.ndarray((5,3),dtype=object)
 
+# only works for single page menues, but no multi page menues have been observed over the past months.
 for knd in range(0,5):
 	for i in range(0,3):
 		Tec[knd][i] = re.sub('(€ ?\d+\,\d{1,2})', "", re.sub(' *\((.*?)\)', "", df2[0]['data'][knd+2][i+1]['text'].replace("\r", " ")))
@@ -275,4 +291,4 @@ for knd in range(0,5):
 
 lunchprinter(NeunB,Men,Tec,flags,dev_flags)
 
-#TODO delete files after reading?!
+#TODO should write three functions which generate the menue and then a printer function which is more simple 
