@@ -25,8 +25,79 @@ weeknumber = str(weeknumber)  				# for string concatenation later on
 year = str(datetime.date.today().year)
 
 ###################################################################################################
+#TODO WIP menue getter functions for correct week
+#idea: function that takes location, weeknumber and day which can be called multiple times
 
-def lunchprinter(NeunBE, Mensa, Tech, Flags, DevFlags):
+def getMenue(place,week=0,day=0):   #default values for week (0 = current week) and day (0= Monday?!)
+	
+	currentWeek = datetime.date.today().isocalendar()[1]
+	currentYear = datetime.date.today().year
+	if not (week == 0 or week ==1):
+		raise Exception("Menu can only be retrieved for current week (0) or next week (1)")
+	else:
+		if place == "Mensa":
+			pass #TODO temp
+	
+		elif place == "Tech":
+			pass #TODO temp
+			
+		elif place == "9b":
+			if week != 0:
+				raise Exception("9b menu not available for the coming week")	
+			elif day < 5:
+				file_9b = "neunB_menu_week"+str(currentWeek+week)+".jpg"
+				url_9b = 'http://neunbe.at/menue.html'
+				browser = RoboBrowser(history=True)
+				try:
+					browser.open(url_9b)
+					request = browser.session.get(url_9b, stream=True)
+					corr_url = re.search("2019\" src=\"../pictures/((?s).*\">)", str(request.content))[0].split("<br>")[0].split("/")[2].split(".jpg\">")[0]
+
+				except TypeError:
+					raise Exception("9b menue page down, current menu not available")
+					return ("Sorry, no menue for 9b available at the moment") 
+				try: 
+					urllib.request.urlretrieve("http://neunbe.at/pictures/"+corr_url+".jpg", file_9b)	
+				except:  #should specify on which error except should be
+					raise Exception("9b menue not found (probably not uploaded yet)")
+					return ("Sorry, no menue for 9b available at the moment") 
+				
+				area = (580,310,1300,1300)  # TODO automatically find this area
+				img = Image.open(file_9b).crop(area)
+				try:
+					ocr = pytesseract.image_to_string(img, lang="deu", config='--psm 6')
+					Mo = re.sub(" +", " ", re.search('Montag((?s).*)Dienstag', out).group(1).replace("\n"," ").replace(" , ",", ").strip())
+					Di = re.sub(" +", " ", re.search('Dienstag((?s).*)Mittwoch', out).group(1).replace("\n"," ").replace(" , ",", ").strip())
+					Mi = re.sub(" +", " ", re.search('Mittwoch((?s).*)Donnerstag', out).group(1).replace("\n"," ").replace(" , ",", ").strip())
+					Do = re.sub(" +", " ", re.search('Donnerstag((?s).*)Freitag', out).group(1).replace("\n"," ").replace(" , ",", ").strip())
+					Fr = re.sub(" +", " ", re.search('Freitag((?s).*)Monatsburger', out).group(1).replace("\n"," ").replace(" , ",", ").strip())
+				except AttributeError:
+					ocr = pytesseract.image_to_string(img, lang="deu", config='--psm 3')
+					Mo = re.sub(" +", " ", re.search('Montag((?s).*)Dienstag', out).group(1).replace("\n"," ").replace(" , ",", ").strip())
+					Di = re.sub(" +", " ", re.search('Dienstag((?s).*)Mittwoch', out).group(1).replace("\n"," ").replace(" , ",", ").strip())
+					Mi = re.sub(" +", " ", re.search('Mittwoch((?s).*)Donnerstag', out).group(1).replace("\n"," ").replace(" , ",", ").strip())
+					Do = re.sub(" +", " ", re.search('Donnerstag((?s).*)Freitag', out).group(1).replace("\n"," ").replace(" , ",", ").strip())
+					Fr = re.sub(" +", " ", re.search('Freitag((?s).*)Monatsburger', out).group(1).replace("\n"," ").replace(" , ",", ").strip())
+				
+				MBurger = re.sub(" +", " ", re.search('Monatsburger:((?s).*)\s\u20AC((?s).*)Wochenburger', out).group(1).replace("\n", " ").replace(" , ",", ").strip())
+				try:
+					WBurger = re.sub(" +", " ", re.search('Wochenburger:((?s).*)\s\u20AC', out).group(1).replace("\n", " ").replace(" , ",", ").strip())
+				except AttributeError:
+					WBurger = re.sub(" +", " ", re.search('Wochenburger:((?s).*)Valle', out).group(1).replace("\n", " ").replace(" , ",", ").strip())
+				out_obj_9b = [[Mo,Di,Mi,Do,Fr][day],MBurger,WBurger]
+				return out_obj_9b
+			elif day>=5:
+				raise Exception("9b menu not available for the coming week")
+				return ("Sorry, no menue for 9b avalaible at the moment")
+	
+		else:
+			raise Exception("First argument has to be 'Mensa', 'Tech' or '9b'")
+
+# TODO Look up how to catch Exception (probably try except blocks)
+# for testing:
+#print(getMenue("9b",0,0))
+###################################################################################################
+def lunchPrinter(NeunBE, Mensa, Tech, Flags, DevFlags):
 	
 	mensa_names = ['_Menü Classic:_ \t', '_Vegetarisch:_ \t', '_Tagesteller:_ \t']
 	tech_names = ['_Tagesteller:_ \t', '_Vegetarisch:_ \t', '_Pasta:_ \t\t']
@@ -289,6 +360,6 @@ for knd in range(0,5):
 
 ###################################################################################################
 
-lunchprinter(NeunB,Men,Tec,flags,dev_flags)
+lunchPrinter(NeunB,Men,Tec,flags,dev_flags)
 
 #TODO should write three functions which generate the menue and then a printer function which is more simple 
