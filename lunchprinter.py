@@ -86,23 +86,28 @@ def getMenue_9b(day):
 		
 		area = (580,310,1300,1300)  # TODO automatically find this area
 		img = Image.open(file_9b).crop(area)
+		#img.show()
 		
 		try:
-			ocr = pytesseract.image_to_string(img, lang="deu", config='--psm 6')
-			Mo = string_format_9b('Montag((?s).*)Dienstag',ocr)
-			Di = string_format_9b('Dienstag((?s).*)Mittwoch', ocr)
-			Mi = string_format_9b('Mittwoch((?s).*)Donnerstag',ocr)
-			Do = string_format_9b('Donnerstag((?s).*)Freitag',ocr)
-			Fr = string_format_9b('Freitag((?s).*)Monatsburger', ocr)
+			try:
+				ocr = pytesseract.image_to_string(img, lang="deu", config='--psm 6')
+				Mo = string_format_9b('Montag((?s).*)Dienstag',ocr)
+				Di = string_format_9b('Dienstag((?s).*)Mittwoch', ocr)
+				Mi = string_format_9b('Mittwoch((?s).*)Donnerstag',ocr)
+				Do = string_format_9b('Donnerstag((?s).*)Freitag',ocr)
+				Fr = string_format_9b('Freitag((?s).*)Monatsburger', ocr)
+			except AttributeError:
+				ocr = pytesseract.image_to_string(img, lang="deu", config='--psm 3')
+				Mo = string_format_9b('Montag((?s).*)Dienstag',ocr)
+				Di = string_format_9b('Dienstag((?s).*)Mittwoch', ocr)
+				Mi = string_format_9b('Mittwoch((?s).*)Donnerstag',ocr)
+				Do = string_format_9b('Donnerstag((?s).*)Freitag',ocr)
+				Fr = string_format_9b('Freitag((?s).*)Monatsburger', ocr)
+				DEV_FLAG = "psm 3 was used"
 		except AttributeError:
-			ocr = pytesseract.image_to_string(img, lang="deu", config='--psm 3')
-			Mo = string_format_9b('Montag((?s).*)Dienstag',ocr)
-			Di = string_format_9b('Dienstag((?s).*)Mittwoch', ocr)
-			Mi = string_format_9b('Mittwoch((?s).*)Donnerstag',ocr)
-			Do = string_format_9b('Donnerstag((?s).*)Freitag',ocr)
-			Fr = string_format_9b('Freitag((?s).*)Monatsburger', ocr)
-			DEV_FLAG = "psm 3 was used"
-			
+			DEV_FLAG = "9b menue is template only"
+			return [USR_MSG, DEV_FLAG]			
+		
 		MBurger =  string_format_9b('Monatsburger:((?s).*)\s\u20AC((?s).*)Wochenburger',ocr)
 		
 		try:
