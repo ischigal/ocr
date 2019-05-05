@@ -96,6 +96,7 @@ def getMenue_9b(day):
 				Mi = string_format_9b('Mittwoch((?s).*)Donnerstag',ocr)
 				Do = string_format_9b('Donnerstag((?s).*)Freitag',ocr)
 				Fr = string_format_9b('Freitag((?s).*)Monatsburger', ocr)
+				DEV_FLAG = "psm 6 was used"
 			except AttributeError:
 				ocr = pytesseract.image_to_string(img, lang="deu", config='--psm 3')
 				Mo = string_format_9b('Montag((?s).*)Dienstag',ocr)
