@@ -30,7 +30,6 @@ def getMenue_Mensen_weekly(locid, week):
 	except:
 		DEV_FLAG = "ID"+str(locid)+" PDF not found"
 		return [USER_MSG, DEV_FLAG]
-		
 	df = tabula.read_pdf(file_Mensen, pages="all", lattice=True, guess=True, mulitple_tables=True ,output_format="json")
 	if len(df) < 1:
 		DEV_FLAG = "ID"+str(locid)+" PDF has 0 pages"
@@ -69,12 +68,12 @@ def getMenue_9b(day):
 		file_9b = "neunB_menu_week"+str(currentWeek)+".jpg"
 		url_9b = 'http://neunbe.at/menue.html'
 		browser = RoboBrowser(history=True)
-		
 		try:
 			browser.open(url_9b)
-			url_content = str(browser.session.get(url_9b, stream=True).content)
-			corr_url = re.search("2019\" src=\"../pictures/((?s).*\">)", url_content)[0].split("<br>")[0].split("/")[2].split(".jpg\">")[0]
+			url_content = str(browser.session.get(url_9b, stream=True).content)			
+			corr_url = re.search("2019\" src=\"../pictures/((?s).*\">)", url_content).groups()[0].split("</a>")[0].split(".jpg\">")[0]
 		except TypeError:
+			print("except")
 			DEV_FLAG = "9b menue page down, current menu not available"
 			return [USR_MSG, DEV_FLAG] 
 			
