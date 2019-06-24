@@ -12,7 +12,7 @@ DEVID = int(open("botkey.txt").readlines()[1].strip())
 def refreshmenue():   # TODO rework this function using import lunchprinter or something
 	lunchprinter.lunchPrinter()
 	print("last update", datetime.datetime.now())
-	threading.Timer(600, refreshmenue).start()
+	threading.Timer(3600, refreshmenue).start()
 
 refreshmenue()
 
