@@ -72,10 +72,10 @@ def getMenue_9b(day):
 			browser.open(url_9b)
 			url_content = str(browser.session.get(url_9b, stream=True).content)			
 			corr_url = re.search("2019\" src=\"../pictures/((?s).*\">)", url_content).groups()[0].split("</a>")[0].split(".jpg\">")[0]
-		except TypeError:
-			print("except")
-			DEV_FLAG = "9b menue page down, current menu not available"
-			return [USR_MSG, DEV_FLAG] 
+		except:# TypeError or AttributeError:
+			#print("except")
+		    DEV_FLAG = "9b menue page down, current menu not available"
+		    return [USR_MSG, DEV_FLAG] 
 			
 		try: 
 			urllib.request.urlretrieve("http://neunbe.at/pictures/"+corr_url+".jpg", file_9b)	
