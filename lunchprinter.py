@@ -70,8 +70,10 @@ def getMenue_9b(day):
 		browser = RoboBrowser(history=True)
 		try:
 			browser.open(url_9b)
-			url_content = str(browser.session.get(url_9b, stream=True).content)			
-			corr_url = re.search("2019\" src=\"../pictures/((?s).*\">)", url_content).groups()[0].split("</a>")[0].split(".jpg\">")[0]
+			url_content = str(browser.session.get(url_9b, stream=True).content)		
+			#print(url_content, "\n\n\n")	
+			corr_url = re.search("\d{1,2}\" src=\"../pictures/((?s).*\">)", url_content).groups()[0].split("</a>")[0].split(".jpg\">")[0]
+			#print(corr_url)
 		except:# TypeError or AttributeError:
 			#print("except")
 		    DEV_FLAG = "9b menue page down, current menu not available"
