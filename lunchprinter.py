@@ -18,7 +18,7 @@ def string_format_9b(string1, string2):
 	return re.sub(" +", " ", re.search(string1, string2).group(1).replace("\n"," ").replace(" , ",", ").strip())
 
 def string_format_Mensen(DataFrame,IndexA,IndexB,IndexC): 
-	return re.sub("([ABCDEFGHLMNOPR],)+[ABCDEFGHLMNOPR]", "", re.sub('(€ ?\d+\,\d{1,2})', "", DataFrame[IndexA]['data'][IndexB][IndexC]['text'].replace("\r", " "))).strip()
+	return re.sub("[A,B,C]*[^,]*", "", re.sub('(€ ?\d+\,\d{1,2})', "", DataFrame[IndexA]['data'][IndexB][IndexC]['text'].replace("\r", " "))).strip()
 
 def getMenue_Mensen_weekly(locid, week):
 	currentWeek = datetime.date.today().isocalendar()[1]
