@@ -2,17 +2,17 @@
 try:
     from PIL import Image
 except ImportError:
-    import Image						# Imagick image viewer and stuff, also needed for screenshots
+    import imagesize                    # Imagick image viewer and stuff, also needed for screenshots
 
-import urllib.request					# for reading URLs
-import pytesseract      				# apt install tesseract 4.0 (not trivial for Ubuntu < 18.04), also apt install libtesseract-dev and pytesseract via pip
-import re								# regual expressions tool for python
-import datetime							# for current week number and week day
-import tabula							# to read pdfs, important to pip install tabula-py and not tabula
-import numpy as np						# for array operations
-from robobrowser import RoboBrowser 	# for automatic browsing of 9b website
+import urllib.request                   # for reading URLs
+import pytesseract                      # apt install tesseract 4.0 (not trivial for Ubuntu < 18.04), also apt install libtesseract-dev and pytesseract via pip
+import re                               # regual expressions tool for python
+import datetime                         # for current week number and week day
+import tabula                           # to read pdfs, important to pip install tabula-py and not tabula
+import numpy as np                      # for array operations
+from robobrowser import RoboBrowser     # for automatic browsing of 9b website
 
-pytesseract.pytesseract.tesseract_cmd = r'/usr/bin/tesseract'  # tesseract location (of executable/command!);
+pytesseract.pytesseract.tesseract_cmd = r'/usr/bin/tesseract'       # tesseract location (of executable/command!);
 
 
 def string_format_9b(string1, string2):
@@ -58,7 +58,7 @@ def getMenue_Mensen_weekly(locid, week):
 def getMenue_Mensen(locid, day):
 
     if day < 5:
-        menue_flag = getMenue_Mensen_weekly(locid, 0)
+        menue_flag = getMenue_Mensen_weekly(locid, 0)  # stupid to call function for whole week every single time
         return [menue_flag[0][day], menue_flag[1]]
     else:
         menue_flag = getMenue_Mensen_weekly(locid, 1)
@@ -76,11 +76,8 @@ def getMenue_9b(day):
         try:
             browser.open(url_9b)
             url_content = str(browser.session.get(url_9b, stream=True).content)
-            # print(url_content, "\n\n\n")
             corr_url = re.search("\d{1,2}\" src=\"../pictures/((?s).*\">)", url_content).groups()[0].split("</a>")[0].split(".jpg\">")[0]
-            # print(corr_url)
         except:  # TypeError or AttributeError:
-            # print("except")
             DEV_FLAG = "9b menue page down, current menu not available"
             return [USR_MSG, DEV_FLAG]
 
