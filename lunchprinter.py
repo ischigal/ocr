@@ -6,7 +6,7 @@ except ImportError:
 
 import urllib.request                   # for reading URLs
 import pytesseract                      # apt install tesseract 4.0 (not trivial for Ubuntu < 18.04), also apt install libtesseract-dev and pytesseract via pip
-import re                               # regual expressions tool for python
+import re                               # regular expressions tool for python
 import datetime                         # for current week number and week day
 import tabula                           # to read pdfs, important to pip install tabula-py and not tabula
 import numpy as np                      # for array operations
@@ -20,7 +20,7 @@ def string_format_9b(string1, string2):
 
 
 def string_format_Mensen(DataFrame, IndexA, IndexB, IndexC):
-    return re.sub('\s+', ' ', re.sub('\([ABCDEFGHLMNOPR,\s]*\)', "", re.sub('(€ ?\d+\,\d{1,2})', "", DataFrame[IndexA]['data'][IndexB][IndexC]['text'].replace("\r", " ")))).strip()
+    return re.sub('\s+', ' ', re.sub('\([ABCDEFGHLMNOPR/\s]*\)', "", re.sub('\([ABCDEFGHLMNOPR,\s]*\)', "", re.sub('(€ ?\d+\,\d{1,2})', "", DataFrame[IndexA]['data'][IndexB][IndexC]['text'].replace("\r", " "))))).strip()
 
 
 def getMenue_Mensen_weekly(locid, week):
@@ -87,7 +87,8 @@ def getMenue_9b(day):
             DEV_FLAG = "9b menue not found (probably not uploaded yet)"
             return [USR_MSG, DEV_FLAG]
 
-        area = (580, 310, 1300, 1300)  # TODO automatically find this area
+        # area = (580, 310, 1300, 1300)  # TODO automatically find this area
+        area = (1200, 600, 2700, 2700)
         img = Image.open(file_9b).crop(area)
         # img.show()
 
