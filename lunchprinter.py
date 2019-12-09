@@ -87,10 +87,16 @@ def getMenue_9b(day):
             DEV_FLAG = "9b menue not found (probably not uploaded yet)"
             return [USR_MSG, DEV_FLAG]
 
-        # area = (580, 310, 1300, 1300)  # TODO automatically find this area
-        # area = (1200, 600, 2700, 2700)
-        area = (600,300,1500,1300) 
-        img = Image.open(file_9b).crop(area)
+        img = Image.open(file_9b)
+        dims = img.size
+        if dims == (1417, 1415):
+            area = (600, 300, 1500, 1300)
+        elif dims == (3000, 3000):
+            area = (1200, 600, 2700, 2700)
+        else:
+            area = (580, 310, 1300, 1300)  # TODO automatically find this area
+
+        img = img.crop(area)
         # img.show()
 
         try:
