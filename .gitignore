@@ -6,3 +6,4 @@ today_out*
 tomorrow_out*
 week_out*
 *flags_out*
+__pycache__/
