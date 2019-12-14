@@ -1,9 +1,4 @@
-botkey.txt
-mensa_menu_week*
-tech_menu_week*
-neunB_menu_week*
-today_out*
-tomorrow_out*
-week_out*
-*flags_out*
 __pycache__/
+*.jpg
+*.pdf
+*.txt
