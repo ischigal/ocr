@@ -76,13 +76,13 @@ def getMenue_9b(day):
         try:
             browser.open(url_9b)
             url_content = str(browser.session.get(url_9b, stream=True).content)
-            corr_url = re.search("\d{1,2}\" src=\"../pictures/((?s).*\">)", url_content).groups()[0].split("</a>")[0].split(".jpg\">")[0]
+            corr_url = re.search("\" src=\"../pictures/mdw-.*?\">", url_content).group(0).split(".jpg\">")[0].split(" src=\"../")[1]
         except:  # TypeError or AttributeError:
             DEV_FLAG = "9b menue page down, current menu not available"
             return [USR_MSG, DEV_FLAG]
 
         try:
-            urllib.request.urlretrieve("http://neunbe.at/pictures/"+corr_url+".jpg", file_9b)
+            urllib.request.urlretrieve("http://neunbe.at/"+corr_url+".jpg", file_9b)
         except:
             DEV_FLAG = "9b menue not found (probably not uploaded yet)"
             return [USR_MSG, DEV_FLAG]
@@ -93,11 +93,13 @@ def getMenue_9b(day):
             area = (600, 300, 1500, 1300)
         elif dims == (3000, 3000):
             area = (1200, 600, 2700, 2700)
+        elif dims == (935, 934):
+            area = (275, 118, 825, 800)
         else:
             area = (580, 310, 1300, 1300)  # TODO automatically find this area
 
         img = img.crop(area)
-        # img.show()
+        #img.show()
 
         try:
             try:
@@ -125,7 +127,11 @@ def getMenue_9b(day):
         try:
             WBurger = string_format_9b('Wochenburger:((?s).*)\s\u20AC((?s).*)V', ocr)
         except AttributeError:
-            WBurger = string_format_9b('Wochenburger:((?s).*)Valle', ocr)
+            try:
+                WBurger = string_format_9b('Wochenburger:((?s).*)Valle', ocr)
+            except AttributeError:
+                WBurger = string_format_9b('Wochenburger:((?s).*)V alle', ocr)
+
 
         try:
             WVeg = string_format_9b('Wochenangebot:((?s).*)\s\u20AC', ocr)
