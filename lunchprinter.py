@@ -121,7 +121,6 @@ def getMenue_9b(day):
         except AttributeError:
             DEV_FLAG = "9b menue is template only"
             return [USR_MSG, DEV_FLAG]
-
         MBurger = string_format_9b('Monatsburger:((?s).*)\s\u20AC((?s).*)Wochenburger', ocr)
 
         try:
@@ -131,12 +130,13 @@ def getMenue_9b(day):
                 WBurger = string_format_9b('Wochenburger:((?s).*)Valle', ocr)
             except AttributeError:
                 WBurger = string_format_9b('Wochenburger:((?s).*)V alle', ocr)
-
-
         try:
             WVeg = string_format_9b('Wochenangebot:((?s).*)\s\u20AC', ocr)
         except AttributeError:
-            WVeg = string_format_9b('Wochenangebot:((?s).*)Unsere', ocr)
+            try:
+                WVeg = string_format_9b('Wochenangebot:((?s).*)Unsere', ocr)
+            except:
+                WVeg = "unhandeld error, go bug Sebi about it"
 
         out_obj_9b = np.array([[Mo, Di, Mi, Do, Fr][day], MBurger, WBurger, WVeg])
         return [out_obj_9b, DEV_FLAG]
