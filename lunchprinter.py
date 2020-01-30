@@ -7,7 +7,7 @@ except ImportError:
 import urllib.request                   # for reading URLs
 import pytesseract                      # apt install tesseract 4.0 (not trivial for Ubuntu < 18.04), also apt install libtesseract-dev and pytesseract via pip
 import re                               # regular expressions tool for python
-import datetime                         # for current week number and week day
+import datetime as dt                   # for current week number and week day
 import tabula                           # to read pdfs, important to pip install tabula-py and not tabula
 import numpy as np                      # for array operations
 from robobrowser import RoboBrowser     # for automatic browsing of 9b website
@@ -20,12 +20,12 @@ def string_format_9b(string1, string2):
 
 
 def string_format_Mensen(DataFrame, IndexA, IndexB, IndexC):
-    return re.sub('\s+', ' ', re.sub('\([ABCDEFGHLMNOPR/\s]*\)', "", re.sub('\([ABCDEFGHLMNOPR,\s]*\)', "", re.sub('(€ ?\d+\,\d{1,2})', "", DataFrame[IndexA]['data'][IndexB][IndexC]['text'].replace("\r", " "))))).strip()
+    return re.sub(r'\s+', ' ', re.sub(r'\([ABCDEFGHLMNOPR/\s]*\)', "", re.sub(r'\([ABCDEFGHLMNOPR,\s]*\)', "", re.sub(r'(€ ?\d+\,\d{1,2})', "", DataFrame[IndexA]['data'][IndexB][IndexC]['text'].replace("\r", " "))))).strip()
 
 
 def getMenue_Mensen_weekly(locid, week):
-    currentWeek = datetime.date.today().isocalendar()[1]
-    currentYear = datetime.date.today().year
+    currentWeek = dt.date.today().isocalendar()[1]
+    currentYear = dt.date.today().year
     USER_MSG = "Sorry, menue for location ID "+str(locid)+" currently not available\n"
     file_Mensen = "mensa_menu_week_"+str(currentWeek+week)+"_location_"+str(locid)+".pdf"
     try:
@@ -33,7 +33,7 @@ def getMenue_Mensen_weekly(locid, week):
     except:
         DEV_FLAG = "ID"+str(locid)+" PDF not found"
         return [USER_MSG, DEV_FLAG]
-    df = tabula.read_pdf(file_Mensen, pages="all", lattice=True, guess=True, mulitple_tables=True, output_format="json")
+    df = tabula.read_pdf(file_Mensen, pages="all", lattice=True, guess=True, multiple_tables=True, output_format="json")
     if len(df) < 1:
         DEV_FLAG = "ID"+str(locid)+" PDF has 0 pages"
         return [USER_MSG, DEV_FLAG]
@@ -66,8 +66,8 @@ def getMenue_Mensen(locid, day):
 
 
 def getMenue_9b(day):
-    currentWeek = datetime.date.today().isocalendar()[1]
-    currentYear = datetime.date.today().year
+    currentWeek = dt.date.today().isocalendar()[1]
+    currentYear = dt.date.today().year
     USR_MSG = "Sorry, no menue for 9b available at the moment\n"
     if day < 5:
         file_9b = "neunB_menu_week"+str(currentWeek)+".jpg"
@@ -89,54 +89,70 @@ def getMenue_9b(day):
 
         img = Image.open(file_9b)
         dims = img.size
+
         if dims == (1417, 1415):
             area = (600, 300, 1500, 1300)
         elif dims == (3000, 3000):
             area = (1200, 600, 2700, 2700)
-        elif dims == (935, 934):
-            area = (275, 118, 825, 800)
+        # elif dims == (935, 934):
+        #     area = (275, 130, 825, 825)
         else:
-            area = (580, 310, 1300, 1300)  # TODO automatically find this area
-
+            # area = (580, 310, 1300, 1300)  # TODO automatically find fitting area
+            area = (0, 0, dims[0], dims[1])    # or use everything and deal with it
         img = img.crop(area)
-        #img.show()
+        # img.show()
 
         try:
             try:
-                ocr = pytesseract.image_to_string(img, lang="deu", config='--psm 6')
-                Mo = string_format_9b('Montag((?s).*)Dienstag', ocr)
-                Di = string_format_9b('Dienstag((?s).*)Mittwoch', ocr)
-                Mi = string_format_9b('Mittwoch((?s).*)Donnerstag', ocr)
-                Do = string_format_9b('Donnerstag((?s).*)Freitag', ocr)
-                Fr = string_format_9b('Freitag((?s).*)Monatsburger', ocr)
-                DEV_FLAG = "psm 6 was used"
-            except AttributeError:
                 ocr = pytesseract.image_to_string(img, lang="deu", config='--psm 3')
-                Mo = string_format_9b('Montag((?s).*)Dienstag', ocr)
-                Di = string_format_9b('Dienstag((?s).*)Mittwoch', ocr)
-                Mi = string_format_9b('Mittwoch((?s).*)Donnerstag', ocr)
-                Do = string_format_9b('Donnerstag((?s).*)Freitag', ocr)
-                Fr = string_format_9b('Freitag((?s).*)Monatsburger', ocr)
+                Mo = string_format_9b(r'Montag((?s).*)Dienstag', ocr)
+                Di = string_format_9b(r'Dienstag((?s).*)Mittwoch', ocr)
+                Mi = string_format_9b(r'Mittwoch((?s).*)Donnerstag', ocr)
+                Do = string_format_9b(r'Donnerstag((?s).*)Freitag', ocr)
+                Fr = string_format_9b(r'Freitag((?s).*)Monatsburger', ocr)
                 DEV_FLAG = "psm 3 was used"
+            except AttributeError:
+                try:
+                    ocr = pytesseract.image_to_string(img, lang="deu", config='--psm 6')
+                    Mo = string_format_9b(r'Montag((?s).*)Dienstag', ocr)
+                    Di = string_format_9b(r'Dienstag((?s).*)Mittwoch', ocr)
+                    Mi = string_format_9b(r'Mittwoch((?s).*)Donnerstag', ocr)
+                    Do = string_format_9b(r'Donnerstag((?s).*)Freitag', ocr)
+                    Fr = string_format_9b(r'Freitag((?s).*)Monatsburger', ocr)
+                    DEV_FLAG = "psm 6 was used"
+                except:
+                    Mo, Di, Mi, Do, Fr = "unhandeld error, go bug Sebi about it"
+                    DEV_FLAG = "neither 3 nor 6 worked"
+
         except AttributeError:
             DEV_FLAG = "9b menue is template only"
             return [USR_MSG, DEV_FLAG]
-        MBurger = string_format_9b('Monatsburger:((?s).*)\s\u20AC((?s).*)Wochenburger', ocr)
+        try:
+            MBurger = string_format_9b(r'Monatsburger:((?s).*)\s\u20AC((?s).*)Wochenburger', ocr)
+        except:
+            MBurger = "unhandeld error, go bug Sebi about it"
 
         try:
-            WBurger = string_format_9b('Wochenburger:((?s).*)\s\u20AC((?s).*)V', ocr)
+            WBurger = string_format_9b(r'Wochenburger:((?s).*)\s\u20AC((?s).*)V', ocr)
         except AttributeError:
             try:
-                WBurger = string_format_9b('Wochenburger:((?s).*)Valle', ocr)
+                WBurger = string_format_9b(r'Wochenburger:((?s).*)Valle', ocr)
             except AttributeError:
-                WBurger = string_format_9b('Wochenburger:((?s).*)V alle', ocr)
+                try:
+                    WBurger = string_format_9b(r'Wochenburger:((?s).*)V alle', ocr)
+                except:
+                    WBurger = "unhandeld error, go bug Sebi about it"
+
         try:
-            WVeg = string_format_9b('Wochenangebot:((?s).*)\s\u20AC', ocr)
+            WVeg = string_format_9b(r'Wochenangebot:((?s).*)\s\u20AC', ocr)
         except AttributeError:
             try:
-                WVeg = string_format_9b('Wochenangebot:((?s).*)Unsere', ocr)
+                WVeg = string_format_9b(r'Wochenangebot:((?s).*)Unsere', ocr)
             except:
-                WVeg = "unhandeld error, go bug Sebi about it"
+                try:
+                    WVeg = string_format_9b(r'Wochenangebot:((?s).*)', ocr)
+                except:
+                    WVeg = "unhandeld error, go bug Sebi about it"
 
         out_obj_9b = np.array([[Mo, Di, Mi, Do, Fr][day], MBurger, WBurger, WVeg])
         return [out_obj_9b, DEV_FLAG]
@@ -218,7 +234,7 @@ def lunchPrinter():
     outfile_dev_flags_tomorrow = open("dev_flags_tomorrow_out.txt", "w")
     outfile_dev_flags_week = open("dev_flags_week_out.txt", "w")
 
-    today = datetime.date.today().weekday()
+    today = dt.date.today().weekday()
 
     menueToday = dayPrinter(today)
     menueTomorrow = dayPrinter(today+1)
