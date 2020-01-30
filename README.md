@@ -11,3 +11,9 @@ apt install libtesseract-dev tesseract-ocr tesseract-ocr-deu #(tesseract version
 pip3 install pytesseract tabula-py robobrowser datetime
 pip3 install python-telegram-bot #(version 12 or newer is required!)
 ```
+
+On Raspbian may additionally need
+
+```bash
+apt-get install libatlas-base-dev
+```
