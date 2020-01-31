@@ -13,11 +13,11 @@ DEVID = int(open("botkey.txt").readlines()[1].strip())
 def refreshMenue():
     lunchPrinter()
     print("last update", dt.now())
+    autoFunc = Timer(3600, refreshMenue)
+    autoFunc.start()
 
 
 refreshMenue()
-autoFunc = Timer(3600, refreshMenue)
-autoFunc.start()
 
 # Enable logging #TODO how does this work and what does it do?
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -32,13 +32,16 @@ logger = logging.getLogger(__name__)
 def start(update, context):
     """Send a message when the command /start is issued."""
     update.message.reply_text('Hi!')
-    update.message.reply_text('Use:\n /today for today\'s lunch \n /tomorrow for tomorrow\'s lunch \n /week for the entire week menue')  # immidiately show options
+    # immidiately show options
+    update.message.reply_text(
+        'Use:\n /today for today\'s lunch \n /tomorrow for tomorrow\'s lunch \n /week for the entire week menue')
 
 
 def help(update, context):
     """Send a message when the command /help is issued."""
 
-    update.message.reply_text('Use:\n /today for today\'s lunch \n /tomorrow for tomorrow\'s lunch \n /week for the entire week menue')
+    update.message.reply_text(
+        'Use:\n /today for today\'s lunch \n /tomorrow for tomorrow\'s lunch \n /week for the entire week menue')
 
 
 def DEV_INFO(update, context, day):
@@ -48,7 +51,8 @@ def DEV_INFO(update, context, day):
         dev_flags = file_dev_flags.read()
         file_dev_flags.close()
         try:
-            update.message.reply_text(dev_flags, parse_mode=telegram.ParseMode.MARKDOWN)
+            update.message.reply_text(
+                dev_flags, parse_mode=telegram.ParseMode.MARKDOWN)
         except:
             print("DEV_INFO may have failed")
             print(update)
@@ -63,7 +67,8 @@ def today(update, context):
     menue_today = file_today.read()
     file_today.close()
     try:
-        update.message.reply_text(menue_today, parse_mode=telegram.ParseMode.MARKDOWN)
+        update.message.reply_text(
+            menue_today, parse_mode=telegram.ParseMode.MARKDOWN)
     except:
         print("sending today may have failed")
         print(update)
@@ -78,7 +83,8 @@ def tomorrow(update, context):
     menue_tomorrow = file_tomorrow.read()
     file_tomorrow.close()
     try:
-        update.message.reply_text(menue_tomorrow, parse_mode=telegram.ParseMode.MARKDOWN)
+        update.message.reply_text(
+            menue_tomorrow, parse_mode=telegram.ParseMode.MARKDOWN)
     except:
         print("sending tomorrow may have failed")
         print(update)
@@ -94,10 +100,13 @@ def week(update, context):
     file_week.close()
     try:
         if len(menue_week) > 4000:  # message character limit is around 4000 (4096 probably)
-            update.message.reply_text(menue_week[:len(menue_week)//2], parse_mode=telegram.ParseMode.MARKDOWN)
-            update.message.reply_text(menue_week[len(menue_week)//2:], parse_mode=telegram.ParseMode.MARKDOWN)
+            update.message.reply_text(
+                menue_week[:len(menue_week)//2], parse_mode=telegram.ParseMode.MARKDOWN)
+            update.message.reply_text(
+                menue_week[len(menue_week)//2:], parse_mode=telegram.ParseMode.MARKDOWN)
         else:
-            update.message.reply_text(menue_week, parse_mode=telegram.ParseMode.MARKDOWN)
+            update.message.reply_text(
+                menue_week, parse_mode=telegram.ParseMode.MARKDOWN)
     except:
         print("sending week may have failed")
         print(update)
@@ -138,7 +147,8 @@ def main():
         pass
 
     # on noncommand - send help info:
-    dp.add_handler(MessageHandler(Filters.text, help))  # does not trigger on typos in commands e.g. /tomorow
+    # does not trigger on typos in commands e.g. /tomorow
+    dp.add_handler(MessageHandler(Filters.text, help))
 
     # log all errors
     dp.add_error_handler(error)
