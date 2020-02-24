@@ -67,7 +67,6 @@ def getMenue_Mensen(locid, day):
 
 def getMenue_9b(day):
     currentWeek = dt.date.today().isocalendar()[1]
-    currentYear = dt.date.today().year
     USR_MSG = "Sorry, no menue for 9b available at the moment\n"
     if day < 5:
         file_9b = "neunB_menu_week"+str(currentWeek)+".jpg"
@@ -76,8 +75,12 @@ def getMenue_9b(day):
         try:
             browser.open(url_9b)
             url_content = str(browser.session.get(url_9b, stream=True).content)
-            corr_url = re.search("\" src=\"../pictures/mdw-.*?\">", url_content).group(0).split(".jpg\">")[0].split(" src=\"../")[1]
-        except:  # TypeError or AttributeError:
+            try:
+                corr_url = re.search("\" src=\"../pictures/mdw-.*?\">", url_content).group(0).split(".jpg\">")[0].split(" src=\"../")[1]
+            except:
+                corr_url = re.search("\" src=\"../pictures/KW-.*?\">", url_content).group(0).split(".jpg\">")[0].split(" src=\"../")[1]
+
+        except:
             DEV_FLAG = "9b menue page down, current menu not available"
             return [USR_MSG, DEV_FLAG]
 
@@ -94,13 +97,15 @@ def getMenue_9b(day):
             area = (600, 300, 1500, 1300)
         elif dims == (3000, 3000):
             area = (1200, 600, 2700, 2700)
-        # elif dims == (935, 934):
-        #     area = (275, 130, 825, 825)
+        elif dims == (960, 960):
+            area = (300, 100, 850, 900)
+        elif dims == (935, 934):
+             area = (275, 130, 825, 825)
         else:
             # area = (580, 310, 1300, 1300)  # TODO automatically find fitting area
             area = (0, 0, dims[0], dims[1])    # or use everything and deal with it
         img = img.crop(area)
-        # img.show()
+        #img.show()
 
         try:
             try:
