@@ -98,7 +98,7 @@ def getMenue_9b(day):
         elif dims == (3000, 3000):
             area = (1200, 600, 2700, 2700)
         elif dims == (960, 960):
-            area = (300, 100, 850, 900)
+            area = (280, 130, 875, 900)
         elif dims == (935, 934):
              area = (275, 130, 825, 825)
         else:
@@ -109,24 +109,25 @@ def getMenue_9b(day):
 
         try:
             try:
-                ocr = pytesseract.image_to_string(img, lang="deu", config='--psm 3')
+                ocr = pytesseract.image_to_string(img, lang="deu", config='--psm 6')
                 Mo = string_format_9b(r'Montag((?s).*)Dienstag', ocr)
                 Di = string_format_9b(r'Dienstag((?s).*)Mittwoch', ocr)
                 Mi = string_format_9b(r'Mittwoch((?s).*)Donnerstag', ocr)
                 Do = string_format_9b(r'Donnerstag((?s).*)Freitag', ocr)
                 Fr = string_format_9b(r'Freitag((?s).*)Monatsburger', ocr)
-                DEV_FLAG = "psm 3 was used"
+                DEV_FLAG = "psm 6 was used"
+                print(ocr)
             except AttributeError:
                 try:
-                    ocr = pytesseract.image_to_string(img, lang="deu", config='--psm 6')
+                    ocr = pytesseract.image_to_string(img, lang="deu", config='--psm 3')
                     Mo = string_format_9b(r'Montag((?s).*)Dienstag', ocr)
                     Di = string_format_9b(r'Dienstag((?s).*)Mittwoch', ocr)
                     Mi = string_format_9b(r'Mittwoch((?s).*)Donnerstag', ocr)
                     Do = string_format_9b(r'Donnerstag((?s).*)Freitag', ocr)
                     Fr = string_format_9b(r'Freitag((?s).*)Monatsburger', ocr)
-                    DEV_FLAG = "psm 6 was used"
+                    DEV_FLAG = "psm 3 was used"
                 except:
-                    Mo, Di, Mi, Do, Fr = "unhandeld error, go bug Sebi about it"
+                    Mo = Di = Mi = Do = Fr = "unhandeld error, go bug Sebi about it"
                     DEV_FLAG = "neither 3 nor 6 worked"
 
         except AttributeError:
