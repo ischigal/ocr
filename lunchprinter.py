@@ -116,7 +116,6 @@ def getMenue_9b(day):
                 Do = string_format_9b(r'Donnerstag((?s).*)Freitag', ocr)
                 Fr = string_format_9b(r'Freitag((?s).*)Monatsburger', ocr)
                 DEV_FLAG = "psm 6 was used"
-                print(ocr)
             except AttributeError:
                 try:
                     ocr = pytesseract.image_to_string(img, lang="deu", config='--psm 3')
