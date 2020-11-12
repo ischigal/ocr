@@ -10,6 +10,8 @@ import re                               # regular expressions tool for python
 import datetime as dt                   # for current week number and week day
 import tabula                           # to read pdfs, important to pip install tabula-py and not tabula
 import numpy as np                      # for array operations
+import werkzeug
+werkzeug.cached_property = werkzeug.utils.cached_property
 from robobrowser import RoboBrowser     # for automatic browsing of 9b website
 
 pytesseract.pytesseract.tesseract_cmd = r'/usr/bin/tesseract'       # tesseract location (of executable/command!);
