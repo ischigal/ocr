@@ -175,12 +175,23 @@ def getMenue_9b(day):
             WBurger = string_format_9b(r'Wochenburger:((?s).*)\s\u20AC((?s).*)V', newest_ocr)
         except AttributeError:
             try:
-                newest_ocr = pytesseract.image_to_string(img, lang="deu", config='--psm 3')
-                WBurger = string_format_9b(r'Wochenburger:((?s).*)Valle', newest_ocr)
-            except AttributeError:
                 try:
                     newest_ocr = pytesseract.image_to_string(img, lang="deu", config='--psm 3')
-                    WBurger = string_format_9b(r'Wochenburger:((?s).*)V alle', newest_ocr)
+                    WBurger = string_format_9b(r'Wochenburger:((?s).*)Valle', newest_ocr)
+                except BaseException:
+
+                    newest_ocr = pytesseract.image_to_string(img, lang="deu", config='--psm 6')
+                    WBurger = string_format_9b(r'Wochenburger:((?s).*)Valle', newest_ocr)
+
+            except AttributeError:
+                try:
+                    try:
+                        newest_ocr = pytesseract.image_to_string(img, lang="deu", config='--psm 3')
+                        WBurger = string_format_9b(r'Wochenburger:((?s).*)V alle', newest_ocr)
+                    except BaseException:
+                        newest_ocr = pytesseract.image_to_string(img, lang="deu", config='--psm 6')
+                        WBurger = string_format_9b(r'Wochenburger:((?s).*)V alle', newest_ocr)
+
                 except BaseException:
                     WBurger = "unhandeld error, go bug Sebi about it"
 
