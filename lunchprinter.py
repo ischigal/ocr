@@ -1,286 +1,231 @@
-# -*- coding: utf-8 -*-
-try:
-    from PIL import Image
-except ImportError:
-    import imagesize                    # Imagick image viewer and stuff, also needed for screenshots
+from urllib.request import urlretrieve  # for reading URLs
+from urllib.error import URLError
+from PIL import Image
+import werkzeug
+werkzeug.cached_property = werkzeug.utils.cached_property
 
-import urllib.request                   # for reading URLs
 import pytesseract                      # apt install tesseract 4.0 (not trivial for Ubuntu < 18.04), also apt install libtesseract-dev and pytesseract via pip
 import re                               # regular expressions tool for python
 import datetime as dt                   # for current week number and week day
 import tabula                           # to read pdfs, important to pip install tabula-py and not tabula
 import numpy as np                      # for array operations
-import werkzeug
-werkzeug.cached_property = werkzeug.utils.cached_property
+
 from robobrowser import RoboBrowser     # for automatic browsing of 9b website
 
 pytesseract.pytesseract.tesseract_cmd = r'/usr/bin/tesseract'       # tesseract location (of executable/command!);
 
 
-def string_format_9b(string1, string2):
-    return re.sub(" +", " ", re.search(string1, string2).group(1).replace("\n", " ").replace(" , ", ", ").strip())
+def string_format_neunbe(regex, searched_string):
+    return re.sub(" +", " ", re.search(regex, searched_string).group(1).replace("\n", " ").replace(" , ", ", ").strip())
 
 
-def string_format_Mensen(DataFrame, IndexA, IndexB, IndexC):
+def string_format_Mensen(data_frame, index_one, index_two, index_three):
     return re.sub(
         r'\s+',
         ' ',
         re.sub(
-            r'\([ABCDEFGHLMNOPR/\s]*\)',
+            r'\([ABCDEFGHLMNOPR/\s]*\)',  # this strips allergy signs
             "",
             re.sub(
-                r'\([ABCDEFGHLMNOPR,\s]*\)',
+                r'\([ABCDEFGHLMNOPR,\s]*\)',  # this strips allergy signs as well
                 "",
                 re.sub(
-                    r'(€ ?\d+\,\d{1,2})',
+                    r'(€ ?\d+\,\d{1,2})',  # this strips prices
                     "",
-                    DataFrame[IndexA]['data'][IndexB][IndexC]['text'].replace(
+                    data_frame[index_one]['data'][index_two][index_three]['text'].replace(
                         "\r",
                         " "))))).strip()
 
 
-def getMenue_Mensen_weekly(locid, week):
-    currentWeek = dt.date.today().isocalendar()[1]
-    currentYear = dt.date.today().year
-    USER_MSG = "Sorry, menue for location ID " + str(locid) + " currently not available\n"
-    DEV_FLAG = ""
-    file_Mensen = "mensa_menu_week_" + str(currentWeek + week) + "_location_" + str(locid) + ".pdf"
+def get_weekly_menue_pdf_mensa_tech(location_id, week):
+    current_week = dt.date.today().isocalendar()[1]
+    current_year = dt.date.today().year
+    user_message = f"Sorry, menue for location ID {location_id} currently not available\n"
+    dev_info_flag = ""
+    file_mensen = f"mensa_menu_week_{current_week + week}_location_{location_id}.pdf"
+
     try:
-        urllib.request.urlretrieve("http://menu.mensen.at//index/menu-pdf/locid/" +
-                                   str(locid) +
-                                   "?woy=" +
-                                   str(currentWeek +
-                                       week) +
-                                   "&year=" +
-                                   str(currentYear), file_Mensen)
-    except BaseException:
-        DEV_FLAG = "ID" + str(locid) + " PDF not found"
-        return [USER_MSG, DEV_FLAG]
-    df = tabula.read_pdf(file_Mensen, pages="all", lattice=True, guess=True, multiple_tables=True, output_format="json")
-    if len(df) < 1:
-        DEV_FLAG = "ID" + str(locid) + " PDF has 0 pages"
-        return [USER_MSG, DEV_FLAG]
+        urlretrieve(f"http://menu.mensen.at//index/menu-pdf/locid/{location_id}?woy={current_week}&year={current_year}", file_mensen)
+    except URLError:
+        dev_info_flag = f"ID {location_id} PDF not found"
+        return [user_message, dev_info_flag]
+
+    data_frame = tabula.read_pdf(file_mensen, pages="all", lattice=True, guess=True, multiple_tables=True, output_format="json")
+
+    if len(data_frame) < 1:
+        dev_info_flag = f"ID {location_id} PDF has 0 pages"
+        return_list = [user_message, dev_info_flag]
     else:
-        out_obj_Mensen = np.ndarray((5, 3), dtype=object)
-        for iterator in range(0, 5):
+        output_mensen = np.ndarray((5, 3), dtype=object)
+        for iteration in range(5):
             try:  # two page menue
-                if iterator != 4:
-                    for index in range(0, 3):
-                        out_obj_Mensen[iterator][index] = string_format_Mensen(df, 0, iterator + 2, index + 1)
+                if iteration != 4:
+                    for index in range(3):
+                        output_mensen[iteration][index] = string_format_Mensen(data_frame, 0, iteration + 2, index + 1)
                 else:
-                    for index in range(0, 3):
-                        out_obj_Mensen[iterator][index] = string_format_Mensen(df, 2, 1, index + 1)
-                DEV_FLAG = "ID" + str(locid) + " two page PDF"
+                    for index in range(3):
+                        output_mensen[iteration][index] = string_format_Mensen(data_frame, 2, 1, index + 1)
+                dev_info_flag = f"ID {location_id} two page PDF"
             except BaseException:  # single page
-                for index in range(0, 3):
-                    out_obj_Mensen[iterator][index] = string_format_Mensen(df, 0, iterator + 2, index + 1)
-                    DEV_FLAG = "ID" + str(locid) + " single page PDF"
-        return [out_obj_Mensen, DEV_FLAG]
+                for index in range(3):
+                    output_mensen[iteration][index] = string_format_Mensen(data_frame, 0, iteration + 2, index + 1)
+                    dev_info_flag = f"ID {location_id} single page PDF"
+        return_list = [output_mensen, dev_info_flag]
+    return return_list
 
 
-def getMenue_Mensen(locid, day):
+def get_menue_mensen(location_id, day):
 
     if day < 5:
-        menue_flag = getMenue_Mensen_weekly(locid, 0)  # stupid to call function for whole week every single time
-        return [menue_flag[0][day], menue_flag[1]]
+        menue_flag = get_weekly_menue_pdf_mensa_tech(location_id, 0)  # stupid to call function for whole week every single time
+        return_list = [menue_flag[0][day], menue_flag[1]]
     else:
-        menue_flag = getMenue_Mensen_weekly(locid, 1)
-        return [menue_flag[0][0], menue_flag[1]]  # show next monday
+        menue_flag = get_weekly_menue_pdf_mensa_tech(location_id, 1)
+        return_list = [menue_flag[0][0], menue_flag[1]]
+    return return_list
 
 
-def getMenue_9b(day):
-    currentWeek = dt.date.today().isocalendar()[1]
-    USR_MSG = "Sorry, no menue for 9b available at the moment\n"
+def get_menue_neunbe(day):
+    current_week = dt.date.today().isocalendar()[1]
+    current_year = dt.date.today().year
+
+    user_message = "Sorry, no menue for 9b available at the moment\n"
     if day < 5:
-        file_9b = "neunB_menu_week" + str(currentWeek) + ".jpg"
-        url_9b = 'http://neunbe.at/menue.html'
+        file_neunbe = f"neunbe_menu_week{current_week}.jpg"
+        url_neunbe = 'http://neunbe.at/index.html'
         browser = RoboBrowser(history=True)
         try:
-            browser.open(url_9b)
-            url_content = str(browser.session.get(url_9b, stream=True).content)
-            try:
-                corr_url = re.search("\" src=\"../pictures/mdw-.*?\">", url_content).group(0).split(".jpg\">")[0].split(" src=\"../")[1]
-            except BaseException:
-                try:
-                    corr_url = re.search("\" src=\"../pictures/KW-.*?\">", url_content).group(0).split(".jpg\">")[0].split(" src=\"../")[1]
-                except BaseException:
-                    corr_url = re.search("\" src=\"../pictures/KW.*?\">", url_content).group(0).split(".jpg\">")[0].split(" src=\"../")[1]
+            browser.open(url_neunbe)
+            url_content = str(browser.session.get(url_neunbe, stream=True).content)
+            corr_url = re.search(f"\" src=\"../pictures/{current_year}-KW-.*?\">", url_content).group(0).split(".jpg\">")[0].split(" src=\"../")[1]
 
-        except BaseException:
-            DEV_FLAG = "9b menue page down, current menu not available"
-            return [USR_MSG, DEV_FLAG]
+        except URLError:
+            dev_info_flag = "9b menue page down, current menu not available"
+            return [user_message, dev_info_flag]
 
         try:
-            urllib.request.urlretrieve("http://neunbe.at/" + corr_url + ".jpg", file_9b)
-        except BaseException:
-            DEV_FLAG = "9b menue not found (probably not uploaded yet)"
-            return [USR_MSG, DEV_FLAG]
+            urlretrieve(f"http://neunbe.at/{corr_url}.jpg", file_neunbe)
+        except URLError:
+            dev_info_flag = "9b menue not found (probably not uploaded yet)"
+            return [user_message, dev_info_flag]
 
-        img = Image.open(file_9b)
-        dims = img.size
+        image_neunbe = Image.open(file_neunbe)
+        image_dimensions = image_neunbe.size
 
-        if dims == (1417, 1415):
-            area = (600, 300, 1500, 1300)
-        elif dims == (3000, 3000):
-            area = (1200, 600, 2700, 2700)
-        elif dims == (960, 960):
-            area = (280, 130, 875, 900)
-        elif dims == (935, 934):
-            area = (275, 130, 825, 825)
-        elif dims == (594, 841):
-            area = (85, 100, 550, 700)
+        if image_dimensions == (935, 1324):
+            used_image_area = (100, 100, 850, 1300)
         else:
-            # area = (580, 310, 1300, 1300)  # TODO automatically find fitting area
-            area = (0, 0, dims[0], dims[1])    # or use everything and deal with it
-        img = img.crop(area)
+            used_image_area = (0, 0, image_dimensions[0], image_dimensions[1])    # or use everything and deal with it
+        imgage_ocr_input = image_neunbe.crop(used_image_area)
         # img.show()
 
         try:
-            try:
-                ocr = pytesseract.image_to_string(img, lang="deu", config='--psm 6')
-                Mo = string_format_9b(r'Montag((?s).*)Dienstag', ocr)
-                Di = string_format_9b(r'Dienstag((?s).*)Mittwoch', ocr)
-                Mi = string_format_9b(r'Mittwoch((?s).*)Donnerstag', ocr)
-                Do = string_format_9b(r'Donnerstag((?s).*)Freitag', ocr)
-                Fr = string_format_9b(r'Freitag((?s).*)Monatsburger', ocr)
-                DEV_FLAG = "psm 6 was used"
-            except AttributeError:
-                try:
-                    ocr = pytesseract.image_to_string(img, lang="deu", config='--psm 3')
-                    Mo = string_format_9b(r'Montag((?s).*)Dienstag', ocr)
-                    Di = string_format_9b(r'Dienstag((?s).*)Mittwoch', ocr)
-                    Mi = string_format_9b(r'Mittwoch((?s).*)Donnerstag', ocr)
-                    Do = string_format_9b(r'Donnerstag((?s).*)Freitag', ocr)
-                    Fr = string_format_9b(r'Freitag((?s).*)Monatsburger', ocr)
-                    DEV_FLAG = "psm 3 was used"
-                except BaseException:
-                    Mo = Di = Mi = Do = Fr = "unhandeld error, go bug Sebi about it"
-                    DEV_FLAG = "neither 3 nor 6 worked"
-
+            ocr = pytesseract.image_to_string(imgage_ocr_input, lang="deu", config='--psm 3')
         except AttributeError:
-            DEV_FLAG = "9b menue is template only"
-            return [USR_MSG, DEV_FLAG]
-        try:
-            new_ocr = pytesseract.image_to_string(img, lang="deu", config='--psm 3')
-            MBurger = string_format_9b(r'Monatsburger:((?s).*)\s\u20AC((?s).*)Wochenburger', new_ocr)
-        except BaseException:
-            try:
-                new_ocr = pytesseract.image_to_string(img, lang="deu", config='--psm 6')
-                MBurger = string_format_9b(r'Monatsburger:((?s).*)\s\u20AC((?s).*)Wochenburger', new_ocr)
-            except BaseException:
-                MBurger = "unhandeld error, go bug Sebi about it"
+            dev_info_flag = "ocr did not work, might need to change page separation mode"
+            return [user_message, dev_info_flag]
 
         try:
-            newest_ocr = pytesseract.image_to_string(img, lang="deu", config='--psm 3')
-            WBurger = string_format_9b(r'Wochenburger:((?s).*)\s\u20AC((?s).*)V', newest_ocr)
+            monday_lunch = string_format_neunbe(r'Montag((?s).*)Dienstag', ocr)
+            tuesday_lunch = string_format_neunbe(r'Dienstag((?s).*)Mittwoch', ocr)
+            wednesday_lunch = string_format_neunbe(r'Mittwoch((?s).*)Donnerstag', ocr)
+            thursday_lunch = string_format_neunbe(r'Donnerstag((?s).*)Freitag', ocr)
+            friday_lunch = string_format_neunbe(r'Freitag((?s).*)Wochenburger', ocr)
+            dev_info_flag = "psm 3 was used"
+
+        except AttributeError:
+            monday_lunch = tuesday_lunch = wednesday_lunch = thursday_lunch = friday_lunch = "unhandeld error, go bug Sebi about it"
+            dev_info_flag = "ocr worked but regex didn't, might need to change keys"
+        try:
+            weekly_burger = string_format_neunbe(r'Wochenburger:((?s).*)V alle', ocr)
         except AttributeError:
             try:
-                try:
-                    newest_ocr = pytesseract.image_to_string(img, lang="deu", config='--psm 3')
-                    WBurger = string_format_9b(r'Wochenburger:((?s).*)Valle', newest_ocr)
-                except BaseException:
-
-                    newest_ocr = pytesseract.image_to_string(img, lang="deu", config='--psm 6')
-                    WBurger = string_format_9b(r'Wochenburger:((?s).*)Valle', newest_ocr)
+                weekly_burger = string_format_neunbe(r'Wochenburger:((?s).*)V Burger', ocr)
 
             except AttributeError:
-                try:
-                    try:
-                        newest_ocr = pytesseract.image_to_string(img, lang="deu", config='--psm 3')
-                        WBurger = string_format_9b(r'Wochenburger:((?s).*)V alle', newest_ocr)
-                    except BaseException:
-                        newest_ocr = pytesseract.image_to_string(img, lang="deu", config='--psm 6')
-                        WBurger = string_format_9b(r'Wochenburger:((?s).*)V alle', newest_ocr)
-
-                except BaseException:
-                    WBurger = "unhandeld error, go bug Sebi about it"
+                weekly_burger = "unhandeld error, go bug Sebi about it"
 
         try:
-            the_newestest_ocr = pytesseract.image_to_string(img, lang="deu", config='--psm 3')
-            WVeg = string_format_9b(r'Wochenangebot:((?s).*)\s\u20AC', the_newestest_ocr)
+            weekly_veggie = string_format_neunbe(r'Wochenangebot:((?s).*)\s\u20AC', ocr)
         except AttributeError:
             try:
-                the_newestest_ocr = pytesseract.image_to_string(img, lang="deu", config='--psm 3')
-                WVeg = string_format_9b(r'Wochenangebot:((?s).*)Unsere', the_newestest_ocr)
-            except BaseException:
+                weekly_veggie = string_format_neunbe(r'Wochenangebot:((?s).*)Unsere', ocr)
+            except AttributeError:
                 try:
-                    the_newestest_ocr = pytesseract.image_to_string(img, lang="deu", config='--psm 3')
-                    WVeg = string_format_9b(r'Wochenangebot:((?s).*)', the_newestest_ocr)
-                except BaseException:
-                    WVeg = "unhandeld error, go bug Sebi about it"
+                    weekly_veggie = string_format_neunbe(r'Wochenangebot:((?s).*)', ocr)
+                except AttributeError:
+                    weekly_veggie = "unhandeld error, go bug Sebi about it"
 
-        out_obj_9b = np.array([[Mo, Di, Mi, Do, Fr][day], MBurger, WBurger, WVeg])
-        return [out_obj_9b, DEV_FLAG]
+        output_neunbe = np.array([[monday_lunch, tuesday_lunch, wednesday_lunch, thursday_lunch, friday_lunch][day], weekly_burger, weekly_veggie])
+        return [output_neunbe, dev_info_flag]
 
     else:
-        DEV_FLAG = "Hoch die Hände, Wochenende"
-        return [USR_MSG, DEV_FLAG]
+        dev_info_flag = "Hoch die Hände, Wochenende"
+        return [user_message, dev_info_flag]
 
 
-def dayPrinter(date):
-    menue9b = getMenue_9b(date)
-    menueMensa = getMenue_Mensen(42, date)
-    menueTech = getMenue_Mensen(55, date)
-    return [menue9b, menueMensa, menueTech]
+def day_printer(date):
+    menue_neunbe = get_menue_neunbe(date)
+    menue_mensa = get_menue_mensen(42, date)
+    menue_tech = get_menue_mensen(55, date)
+    return [menue_neunbe, menue_mensa, menue_tech]
 
 
-def miniLoop(place, place_name, outFile):
+def mini_loop(place, place_name, out_file):
     if len(place) == 3:
-        for i in range(0, len(place)):
-            outFile.write(place_name[i] + "\n  " + place[i] + "\n")
-    elif len(place) == 4:
-        for i in range(0, len(place)):
-            outFile.write(place_name[i] + "\n  " + place[i] + "\n")
+        for iter_name, iter_place in zip(place_name, place):
+            out_file.write(iter_name + "\n  " + iter_place + "\n")
     else:
-        outFile.write("\n_" + place + "_\n")
+        out_file.write("\n_" + place + "_\n")
 
 
-def writeLoop(outFile, mensa, tech, neunb, mensa_names, tech_names, neunb_names):
-    outFile.write("\n *Mensa:* \n")
-    miniLoop(mensa, mensa_names, outFile)
-    outFile.write("\n *TechCafe:* \n")
-    miniLoop(tech, tech_names, outFile)
-    outFile.write("\n *9b:* \n")
-    miniLoop(neunb, neunb_names, outFile)
+def write_loop(out_file, mensa, tech, neunbe, mensa_names, tech_names, neunbe_names):
+    out_file.write("\n *Mensa:* \n")
+    mini_loop(mensa, mensa_names, out_file)
+    out_file.write("\n *TechCafe:* \n")
+    mini_loop(tech, tech_names, out_file)
+    out_file.write("\n *9b:* \n")
+    mini_loop(neunbe, neunbe_names, out_file)
 
 
-def outFileWriter(outFile, flagFile, date, menue):
+def out_file_writer(out_file, flag_file, date, menue):
 
     mensa_names = ['_Vegetarisch:_ \t', '_Menü Classic:_ \t', '_Tagesteller:_ \t']
     tech_names = ['_Tagesteller:_ \t', '_Vegetarisch:_ \t', '_Pasta:_ \t\t']
-    neunb_names = ['_Tagesmenü:_ \t', '_Monatsburger:_ \t', '_Wochenburger:_ \t', '_Vegetarisches Wochenangebot:_ \t']
+    neunbe_names = ['_Tagesmenü:_ \t', '_Wochenburger:_ \t', '_Vegetarisches Wochenangebot:_ \t']
     days = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag']
 
     if date == "week":
 
         for i in range(0, 5):
-            outFile.write("\n*" + days[i] + ":* \n")
+            out_file.write("\n*" + days[i] + ":* \n")
             mensa = menue[i][1][0]
             tech = menue[i][2][0]
-            neunb = menue[i][0][0]
-            writeLoop(outFile, mensa, tech, neunb, mensa_names, tech_names, neunb_names)
+            neunbe = menue[i][0][0]
+            write_loop(out_file, mensa, tech, neunbe, mensa_names, tech_names, neunbe_names)
 
         for j in range(0, 3):
-            flagFile.write(menue[0][j][1] + "\n")  # should be the same flags for every day so only do once
+            flag_file.write(menue[0][j][1] + "\n")  # should be the same flags for every day so only do once
 
     else:
+
+        neunbe = menue[0][0]
         mensa = menue[1][0]
         tech = menue[2][0]
-        neunb = menue[0][0]
 
         for i in range(0, 3):
-            flagFile.write(menue[i][1] + "\n")
+            flag_file.write(menue[i][1] + "\n")
 
         if date >= 5:
-            outFile.write("*nächster Montag:* \n")
-            writeLoop(outFile, mensa, tech, neunb, mensa_names, tech_names, neunb_names)
+            out_file.write("*nächster Montag:* \n")
+            write_loop(out_file, mensa, tech, neunbe, mensa_names, tech_names, neunbe_names)
 
         else:
-            outFile.write("*" + days[date] + ":* \n")
-            writeLoop(outFile, mensa, tech, neunb, mensa_names, tech_names, neunb_names)
+            out_file.write("*" + days[date] + ":* \n")
+            write_loop(out_file, mensa, tech, neunbe, mensa_names, tech_names, neunbe_names)
 
 
-def lunchPrinter():
+def lunch_printer():
 
     outfile_today = open("today_out.txt", "w")
     outfile_tomorrow = open("tomorrow_out.txt", "w")
@@ -291,15 +236,15 @@ def lunchPrinter():
 
     today = dt.date.today().weekday()
 
-    menueToday = dayPrinter(today)
-    menueTomorrow = dayPrinter(today + 1)
-    menueWeek = []
+    menue_today = day_printer(today)
+    menue_tomorrow = day_printer(today + 1)
+    menue_week = []
     for day in range(0, 5):
-        menueWeek.append(dayPrinter(day))
+        menue_week.append(day_printer(day))
 
-    outFileWriter(outfile_today, outfile_dev_flags_today, today, menueToday)
-    outFileWriter(outfile_tomorrow, outfile_dev_flags_tomorrow, today + 1, menueTomorrow)
-    outFileWriter(outfile_week, outfile_dev_flags_week, "week", menueWeek)
+    out_file_writer(outfile_today, outfile_dev_flags_today, today, menue_today)
+    out_file_writer(outfile_tomorrow, outfile_dev_flags_tomorrow, today + 1, menue_tomorrow)
+    out_file_writer(outfile_week, outfile_dev_flags_week, "week", menue_week)
 
     outfile_today.close()
     outfile_tomorrow.close()
@@ -309,4 +254,4 @@ def lunchPrinter():
     outfile_dev_flags_week.close()
 
 
-lunchPrinter()
+lunch_printer()

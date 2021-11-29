@@ -4,20 +4,20 @@ from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 from threading import Timer
 from datetime import datetime as dt
 
-from lunchprinter import lunchPrinter
+from lunchprinter import lunch_printer
 
 key = open("botkey.txt").readlines()[0].strip()
 DEVID = int(open("botkey.txt").readlines()[1].strip())
 
 
-def refreshMenue():
-    lunchPrinter()
+def refresh_menue():
+    lunch_printer()
     print("last update", dt.now())
-    autoFunc = Timer(3600, refreshMenue)
-    autoFunc.start()
+    auto_updater = Timer(3600, refresh_menue)
+    auto_updater.start()
 
 
-refreshMenue()
+refresh_menue()
 
 # Enable logging #TODO how does this work and what does it do?
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -44,7 +44,7 @@ def help(update, context):
         'Use:\n /today for today\'s lunch \n /tomorrow for tomorrow\'s lunch \n /week for the entire week menue')
 
 
-def DEV_INFO(update, context, day):
+def dev_info(update, context, day):
     user_ID = update.message.from_user['id']
     if user_ID == DEVID:
         file_dev_flags = open("dev_flags_"+day+"_out.txt", "r")
@@ -62,7 +62,7 @@ def DEV_INFO(update, context, day):
 
 def today(update, context):
 
-    DEV_INFO(update, context, "today")
+    dev_info(update, context, "today")
     file_today = open("today_out.txt", "r")
     menue_today = file_today.read()
     file_today.close()
@@ -78,7 +78,7 @@ def today(update, context):
 
 def tomorrow(update, context):
 
-    DEV_INFO(update, context, "tomorrow")
+    dev_info(update, context, "tomorrow")
     file_tomorrow = open("tomorrow_out.txt", "r")
     menue_tomorrow = file_tomorrow.read()
     file_tomorrow.close()
@@ -94,7 +94,7 @@ def tomorrow(update, context):
 
 def week(update, context):
 
-    DEV_INFO(update, context, "week")
+    dev_info(update, context, "week")
     file_week = open("week_out.txt", "r")
     menue_week = file_week.read()
     file_week.close()
@@ -128,30 +128,30 @@ def main():
     updater = Updater(key, use_context=True)
 
     # Get the dispatcher to register handlers
-    dp = updater.dispatcher
+    dispatcher = updater.dispatcher
 
     # on different commands - answer in Telegram
-    dp.add_handler(CommandHandler("start", start))
-    dp.add_handler(CommandHandler("help", help))
+    dispatcher.add_handler(CommandHandler("start", start))
+    dispatcher.add_handler(CommandHandler("help", help))
     try:
-        dp.add_handler(CommandHandler("today", today))
+        dispatcher.add_handler(CommandHandler("today", today))
     except:
         pass
     try:
-        dp.add_handler(CommandHandler("tomorrow", tomorrow))
+        dispatcher.add_handler(CommandHandler("tomorrow", tomorrow))
     except:
         pass
     try:
-        dp.add_handler(CommandHandler("week", week))
+        dispatcher.add_handler(CommandHandler("week", week))
     except:
         pass
 
     # on noncommand - send help info:
     # does not trigger on typos in commands e.g. /tomorow
-    dp.add_handler(MessageHandler(Filters.text, help))
+    dispatcher.add_handler(MessageHandler(Filters.text, help))
 
     # log all errors
-    dp.add_error_handler(error)
+    dispatcher.add_error_handler(error)
 
     # Start the Bot
     updater.start_polling()
